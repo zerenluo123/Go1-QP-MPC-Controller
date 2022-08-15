@@ -50,20 +50,20 @@ HardwareA1ROS::HardwareA1ROS(ros::NodeHandle &_nh)
     p_br = Eigen::Vector3d(-0.2293, 0.0, -0.067);
     R_br = Eigen::Matrix3d::Identity();
     // leg order: 0-FL  1-FR  2-RL  3-RR
-    leg_offset_x[0] = 0.1805;
-    leg_offset_x[1] = 0.1805;
-    leg_offset_x[2] = -0.1805;
-    leg_offset_x[3] = -0.1805;
-    leg_offset_y[0] = 0.047;
-    leg_offset_y[1] = -0.047;
-    leg_offset_y[2] = 0.047;
-    leg_offset_y[3] = -0.047;
-    motor_offset[0] = 0.0838;
-    motor_offset[1] = -0.0838;
-    motor_offset[2] = 0.0838;
-    motor_offset[3] = -0.0838;
-    upper_leg_length[0] = upper_leg_length[1] = upper_leg_length[2] = upper_leg_length[3] = 0.20;
-    lower_leg_length[0] = lower_leg_length[1] = lower_leg_length[2] = lower_leg_length[3] = 0.20;
+    leg_offset_x[0] = 0.1881;
+    leg_offset_x[1] = 0.1881;
+    leg_offset_x[2] = -0.1881;
+    leg_offset_x[3] = -0.1881;
+    leg_offset_y[0] = 0.04675;
+    leg_offset_y[1] = -0.04675;
+    leg_offset_y[2] = 0.04675;
+    leg_offset_y[3] = -0.04675;
+    motor_offset[0] = 0.08;
+    motor_offset[1] = -0.08;
+    motor_offset[2] = 0.08;
+    motor_offset[3] = -0.08;
+    upper_leg_length[0] = upper_leg_length[1] = upper_leg_length[2] = upper_leg_length[3] = 0.213;
+    lower_leg_length[0] = lower_leg_length[1] = lower_leg_length[2] = lower_leg_length[3] = 0.213;
 
     for (int i = 0; i < NUM_LEG; i++) {
         Eigen::VectorXd rho_fix(5);
