@@ -34,7 +34,7 @@ public:
                                        Eigen::Vector3d foot_pos_final,
                                        double terrain_pitch_angle);
 
-    bool reset_foot_pos_curve() {curve_constructed = false;}
+    void reset_foot_pos_curve() {curve_constructed = false;}
 private:
     double bezier_curve(double t, const std::vector<double> &P);
 

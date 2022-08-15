@@ -6,7 +6,7 @@
 
 // constructor
 HardwareA1ROS::HardwareA1ROS(ros::NodeHandle &_nh)
-        : safe(UNITREE_LEGGED_SDK::LeggedType::A1), udp(UNITREE_LEGGED_SDK::LOWLEVEL) {
+        : safe(UNITREE_LEGGED_SDK::LeggedType::Go1), udp(UNITREE_LEGGED_SDK::LOWLEVEL, 8090, "192.168.123.10", 8007) {
 //    UNITREE_LEGGED_SDK::InitEnvironment();
     nh = _nh;
     // ROS publisher
