@@ -65,13 +65,27 @@ add_library(a1_lib
 target_link_libraries(a1_lib ${catkin_LIBRARIES} OsqpEigen::OsqpEigen)
 
 # lib of different types of robots
+add_library(gazebo_a1_lib
+        src/GazeboA1ROS.h
+        src/GazeboA1ROS.cpp
+        )
+
 add_library(hardware_a1_lib
         src/HardwareA1ROS.h
         src/HardwareA1ROS.cpp
         )
 
 # all robots depends on the a1_lib
+target_link_libraries(gazebo_a1_lib a1_lib)
 target_link_libraries(hardware_a1_lib a1_lib ${EXTRA_LIBS})
+
+# Declare a cpp executable for gazebo robot
+add_executable(gazebo_a1_ctrl src/MainGazebo.cpp)
+target_link_libraries(gazebo_a1_ctrl
+        gazebo_a1_lib
+        ${catkin_LIBRARIES}
+        OsqpEigen::OsqpEigen
+        )
 
 # Declare a cpp executable for hardware robot
 add_executable(hardware_a1_ctrl src/MainHardware.cpp)
