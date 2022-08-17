@@ -38,9 +38,9 @@ public:
         root_ang_vel_d.setZero();
 
         robot_mass = 15.0;
-        a1_trunk_inertia << 0.0158533, 0.0, 0.0,
-                0.0, 0.0377999, 0.0,
-                0.0, 0.0, 0.0456542;
+        a1_trunk_inertia << 0.0168352186, 0.0, 0.0,
+                0.0, 0.0656071082, 0.0,
+                0.0, 0.0, 0.0742720659;
         // this initialization is matlab style
         default_foot_pos << 0.17, 0.17, -0.17, -0.17,
                 0.15, -0.15, 0.15, -0.15,
@@ -146,12 +146,12 @@ public:
         double a1_trunk_inertia_yy;
         double a1_trunk_inertia_zz;
 
-        _nh.param("a1_trunk_inertia_xx", a1_trunk_inertia_xx, 0.0158533);
+        _nh.param("a1_trunk_inertia_xx", a1_trunk_inertia_xx, 0.0168352186);
         _nh.param("a1_trunk_inertia_xy", a1_trunk_inertia_xy, 0.0);
         _nh.param("a1_trunk_inertia_xz", a1_trunk_inertia_xz, 0.0);
         _nh.param("a1_trunk_inertia_yz", a1_trunk_inertia_yz, 0.0);
-        _nh.param("a1_trunk_inertia_yy", a1_trunk_inertia_yy, 0.0377999);
-        _nh.param("a1_trunk_inertia_zz", a1_trunk_inertia_zz, 0.0456542);
+        _nh.param("a1_trunk_inertia_yy", a1_trunk_inertia_yy, 0.0656071082);
+        _nh.param("a1_trunk_inertia_zz", a1_trunk_inertia_zz, 0.0742720659);
 
         a1_trunk_inertia << a1_trunk_inertia_xx, a1_trunk_inertia_xy, a1_trunk_inertia_xz,
                 a1_trunk_inertia_xy, a1_trunk_inertia_yy, a1_trunk_inertia_yz,

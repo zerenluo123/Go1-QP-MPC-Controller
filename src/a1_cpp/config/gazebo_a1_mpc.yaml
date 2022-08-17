@@ -5,12 +5,12 @@ stance_leg_control_type: 1 # 0: QP; 1: MPC
 
 a1_robot_mass: 12.0
 
-a1_trunk_inertia_xx: 0.0158533
+a1_trunk_inertia_xx: 0.0168352186
 a1_trunk_inertia_xy: 0.0
 a1_trunk_inertia_xz: 0.0
 a1_trunk_inertia_yz: 0.0
-a1_trunk_inertia_yy: 0.0377999
-a1_trunk_inertia_zz: 0.0456542
+a1_trunk_inertia_yy: 0.0656071082
+a1_trunk_inertia_zz: 0.0742720659
 
 # default foothold position
 
