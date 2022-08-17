@@ -7,8 +7,8 @@
 
 // control time related
 //#define CTRL_FREQUENCY 2.5  // ms
-#define GRF_UPDATE_FREQUENCY 2.5 // ms
-#define MAIN_UPDATE_FREQUENCY 2.5 // ms
+#define GRF_UPDATE_FREQUENCY 1.5 // ms
+#define MAIN_UPDATE_FREQUENCY 1.5 // ms
 #define HARDWARE_FEEDBACK_FREQUENCY 2.0  // ms
 
 // constant define
