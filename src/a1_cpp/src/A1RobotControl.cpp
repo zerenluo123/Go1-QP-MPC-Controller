@@ -142,7 +142,7 @@ A1RobotControl::A1RobotControl(ros::NodeHandle &_nh) : A1RobotControl() {
 
         foot_path_marker[i].lifetime = ros::Duration();
     }
-    pub_terrain_angle = nh.advertise<std_msgs::Float64>("a1_debug/terrain_angle", 100);
+    pub_terrain_angle = nh.advertise<std_msgs::Float64>("go1_debug/terrain_angle", 100);
 }
 
 void A1RobotControl::update_plan(A1CtrlStates &state, double dt) {
