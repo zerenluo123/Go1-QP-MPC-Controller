@@ -93,6 +93,9 @@ public:
 
     void RR_foot_contact_callback(const geometry_msgs::WrenchStamped &force);
 
+    // terminal state check
+    bool isTerminalState(Eigen::Matrix<double, NUM_DOF, 1> pos);
+
 
 private:
     ros::NodeHandle nh;
@@ -167,6 +170,13 @@ private:
     MovingWindowFilter quat_x;
     MovingWindowFilter quat_y;
     MovingWindowFilter quat_z;
+
+    // pos limit
+    std::vector<std::vector<double>> posLimits = {
+            {-1.047, 1.047}, //Hip
+            {-0.663, 2.966}, //Thigh
+            {-2.721, -0.837}, //Calf
+    };
 };
 
 

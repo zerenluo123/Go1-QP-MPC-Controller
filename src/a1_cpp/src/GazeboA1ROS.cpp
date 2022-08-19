@@ -228,6 +228,13 @@ bool GazeboA1ROS::send_cmd() {
         pub_joint_cmd[i].publish(low_cmd.motorCmd[i]);
     }
 
+    // add a current joint state check if beyond the joint limit
+    std::cout << "All joint state: " << a1_ctrl_states.joint_pos << std::endl;
+    std::cout << "************ Is terminal state: " << isTerminalState(a1_ctrl_states.joint_pos) << std::endl;
+//    if ( isTerminalState(a1_ctrl_states.joint_pos) ) {
+//        return false;
+//    }
+
     return true;
 }
 
@@ -406,4 +413,13 @@ joy_callback(const sensor_msgs::Joy::ConstPtr &joy_msg) {
         std::cout << "You have pressed the exit button!!!!" << std::endl;
         joy_cmd_exit = true;
     }
+}
+
+bool GazeboA1ROS::isTerminalState(Eigen::Matrix<double, NUM_DOF, 1> pos) {
+    for (int i = 0; i < NUM_DOF; i++) {
+        if (pos[i] <= posLimits[i % 3][0] || pos[i] >= posLimits[i % 3][1]) {
+            return true;
+        }
+    }
+    return false;
 }
