@@ -221,6 +221,7 @@ public:
 
         double r_weights_0, r_weights_1, r_weights_2, r_weights_3, r_weights_4, r_weights_5, r_weights_6, r_weights_7, r_weights_8, r_weights_9, r_weights_10, r_weights_11;
 
+        // need to use 0.01 instead of 1e-2 in the yaml file to make parameter server work
         _nh.param("r_weights_0", r_weights_0, 1e-5);
         _nh.param("r_weights_1", r_weights_1, 1e-5);
         _nh.param("r_weights_2", r_weights_2, 1e-6);
