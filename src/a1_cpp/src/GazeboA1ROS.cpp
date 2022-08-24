@@ -229,7 +229,7 @@ bool GazeboA1ROS::send_cmd() {
     }
 
     // add a current joint state check if beyond the joint limit
-    std::cout << "All joint state: " << a1_ctrl_states.joint_pos << std::endl;
+//    std::cout << "All joint state: " << a1_ctrl_states.joint_pos << std::endl;
     std::cout << "************ Is terminal state: " << isTerminalState(a1_ctrl_states.joint_pos) << std::endl;
 //    if ( isTerminalState(a1_ctrl_states.joint_pos) ) {
 //        return false;

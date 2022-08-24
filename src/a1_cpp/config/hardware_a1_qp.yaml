@@ -9,36 +9,36 @@ a1_robot_mass: 15.0
 # default foothold position
 
 a1_default_foot_pos_FL_x: 0.17
-a1_default_foot_pos_FL_y: 0.15
-a1_default_foot_pos_FL_z: -0.33
+a1_default_foot_pos_FL_y: 0.12
+a1_default_foot_pos_FL_z: -0.32
 
 a1_default_foot_pos_FR_x: 0.17
-a1_default_foot_pos_FR_y: -0.15
-a1_default_foot_pos_FR_z: -0.33
+a1_default_foot_pos_FR_y: -0.12
+a1_default_foot_pos_FR_z: -0.32
 
 a1_default_foot_pos_RL_x: -0.17
-a1_default_foot_pos_RL_y: 0.15
-a1_default_foot_pos_RL_z: -0.33
+a1_default_foot_pos_RL_y: 0.12
+a1_default_foot_pos_RL_z: -0.32
 
 a1_default_foot_pos_RR_x: -0.17
-a1_default_foot_pos_RR_y: -0.15
-a1_default_foot_pos_RR_z: -0.33
+a1_default_foot_pos_RR_y: -0.12
+a1_default_foot_pos_RR_z: -0.32
 
-a1_gait_counter_speed_FL: 1.0
-a1_gait_counter_speed_FR: 1.0
-a1_gait_counter_speed_RL: 1.0
-a1_gait_counter_speed_RR: 1.0
+a1_gait_counter_speed_FL: 0.2
+a1_gait_counter_speed_FR: 0.2
+a1_gait_counter_speed_RL: 0.2
+a1_gait_counter_speed_RR: 0.2
 
 # foot swing controller parameters
 # force_tgt = km_foot * kp_foot * foot_pos_error
 
-a1_kp_foot_x: 260.0
-a1_kp_foot_y: 260.0
-a1_kp_foot_z: 350.0
+a1_kp_foot_x: 160.0
+a1_kp_foot_y: 160.0
+a1_kp_foot_z: 250.0
 
-a1_kd_foot_x: 6.0
-a1_kd_foot_y: 6.0
-a1_kd_foot_z: 5.0
+a1_kd_foot_x: 1.5
+a1_kd_foot_y: 1.5
+a1_kd_foot_z: 1.5
 
 a1_km_foot_x: 0.1
 a1_km_foot_y: 0.1
@@ -52,18 +52,18 @@ a1_km_foot_z: 0.1
 #                        + kd_linear (rotation velocity error)
 # root_acc are used to compute ground contact force
 
-a1_kp_linear_x: 400.0
-a1_kp_linear_y: 400.0
+a1_kp_linear_x: 600.0
+a1_kp_linear_y: 600.0
 a1_kp_linear_z: 1500.0
 
-a1_kd_linear_x: 300.0
-a1_kd_linear_y: 200.0
-a1_kd_linear_z: 120.0
+a1_kd_linear_x: 150.0
+a1_kd_linear_y: 150.0
+a1_kd_linear_z: 200.0
 
-a1_kp_angular_x: 40.0
-a1_kp_angular_y: 40.0
-a1_kp_angular_z: 10.0
+a1_kp_angular_x: 60.0
+a1_kp_angular_y: 60.0
+a1_kp_angular_z: 20.0
 
 a1_kd_angular_x: 1.0
 a1_kd_angular_y: 1.0
-a1_kd_angular_z: 0.5
+a1_kd_angular_z: 3.5
