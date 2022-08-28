@@ -60,9 +60,9 @@ a1_kd_linear_x: 150.0
 a1_kd_linear_y: 150.0
 a1_kd_linear_z: 200.0
 
-a1_kp_angular_x: 60.0
-a1_kp_angular_y: 60.0
-a1_kp_angular_z: 20.0
+a1_kp_angular_x: 30.0
+a1_kp_angular_y: 30.0
+a1_kp_angular_z: 10.0
 
 a1_kd_angular_x: 1.0
 a1_kd_angular_y: 1.0
