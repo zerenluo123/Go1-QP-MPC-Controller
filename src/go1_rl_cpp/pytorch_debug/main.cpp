@@ -18,7 +18,7 @@
  * In order to generate the torchscript file, you need to do the following:
  *  1) From the pytorch_debug/ folder, run 'python3 module.py' (no apostrophes). This code will generate the Torchscript file.
  *  2) Navigate to your pytorch_debug/build/ folder and run:
- *      a) cmake -DCMAKE_PREFIX_PATH=/path/to/libtorch ..
+ *      a) cmake ..
  *      b) make
  *  to build the libtorch_debug_app executable
  *  3) Then, run './libtorch_debug_app' from within the build/ folder in order to inference the network that has been serialized for Torchscript

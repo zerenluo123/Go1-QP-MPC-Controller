@@ -42,44 +42,57 @@ include_directories(
 link_directories($ENV{UNITREE_LEGGED_SDK_PATH}/lib/cpp/amd64)
 set(EXTRA_LIBS -pthread libunitree_legged_sdk.so)
 
-# Declare cpp libraries
-# common robot controller every type of robots need
-add_library(go1_lib
-        src/Go1Params.h
-        src/Go1CtrlStates.h
-        src/utils/Utils.cpp
-        src/utils/Utils.h
-        src/Go1RobotControl.cpp
-        src/Go1RobotControl.h
-        src/Go1BasicEKF.cpp
-        src/Go1BasicEKF.h
-        )
+############################
+## Link C++ torch library ##
+############################
+list(APPEND CMAKE_PREFIX_PATH ${CMAKE_CURRENT_LIST_DIR}/libtorch)
 
-# lib of different types of robots
-add_library(gazebo_go1_lib
-        src/GazeboGo1ROS.h
-        src/GazeboGo1ROS.cpp
-        )
+find_package(Torch REQUIRED)
 
-add_library(hardware_go1_lib
-        src/HardwareGo1ROS.h
-        src/HardwareGo1ROS.cpp
-        )
+add_library(torch_eigen STATIC src/TorchEigen.cpp)
+target_link_libraries(torch_eigen "${TORCH_LIBRARIES}")
+set_property(TARGET torch_eigen PROPERTY CXX_STANDARD 14)
+target_include_directories(torch_eigen PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-# all robots depends on the go1_lib
-target_link_libraries(gazebo_go1_lib go1_lib)
-target_link_libraries(hardware_go1_lib go1_lib ${EXTRA_LIBS})
 
-# Declare a cpp executable for gazebo robot
-add_executable(gazebo_go1_ctrl src/MainGazebo.cpp)
-target_link_libraries(gazebo_go1_ctrl
-        gazebo_go1_lib
-        ${catkin_LIBRARIES}
-        )
-
-# Declare a cpp executable for hardware robot
-add_executable(hardware_go1_ctrl src/MainHardware.cpp)
-target_link_libraries(hardware_go1_ctrl
-        hardware_go1_lib
-        ${catkin_LIBRARIES}
-        )
+## Declare cpp libraries
+## common robot controller every type of robots need
+#add_library(go1_lib
+#        src/Go1Params.h
+#        src/Go1CtrlStates.h
+#        src/utils/Utils.cpp
+#        src/utils/Utils.h
+#        src/Go1RobotControl.cpp
+#        src/Go1RobotControl.h
+#        src/Go1BasicEKF.cpp
+#        src/Go1BasicEKF.h
+#        )
+#
+## lib of different types of robots
+#add_library(gazebo_go1_lib
+#        src/GazeboGo1ROS.h
+#        src/GazeboGo1ROS.cpp
+#        )
+#
+#add_library(hardware_go1_lib
+#        src/HardwareGo1ROS.h
+#        src/HardwareGo1ROS.cpp
+#        )
+#
+## all robots depends on the go1_lib
+#target_link_libraries(gazebo_go1_lib go1_lib)
+#target_link_libraries(hardware_go1_lib go1_lib ${EXTRA_LIBS})
+#
+## Declare a cpp executable for gazebo robot
+#add_executable(gazebo_go1_ctrl src/MainGazebo.cpp)
+#target_link_libraries(gazebo_go1_ctrl
+#        gazebo_go1_lib
+#        ${catkin_LIBRARIES}
+#        )
+#
+## Declare a cpp executable for hardware robot
+#add_executable(hardware_go1_ctrl src/MainHardware.cpp)
+#target_link_libraries(hardware_go1_ctrl
+#        hardware_go1_lib
+#        ${catkin_LIBRARIES}
+#        )
