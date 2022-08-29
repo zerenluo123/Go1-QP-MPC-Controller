@@ -28,13 +28,16 @@
 
 int main(int argc, const char* argv[]) {
 
-    int stateDimension = 1221;
+//    int stateDimension = 1221; // module.py
+    int stateDimension = 48; // rl_policy_module.py
 
     torch::manual_seed(0);
 
     torch::jit::script::Module studentModule;
 
-    studentModule = torch::jit::load("../student_traced_debug.pt");
+//    studentModule = torch::jit::load("../student_traced_debug.pt"); // module.py
+    studentModule = torch::jit::load("../cpp_model.pt"); // rl_policy_module.py
+
     studentModule.to(torch::kCPU);
     studentModule.eval();
     torch::NoGradGuard no_grad_;
