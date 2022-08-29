@@ -42,3 +42,6 @@ src/a1_cpp/cmake-build-debug
 src/a1_cpp/cmake-build-debug-remote/
 
 src/a1_cpp/src/mpc_osqp.cc
+
+
+src/go1_rl_cpp/pytorch_debug/libtorch
