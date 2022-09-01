@@ -45,4 +45,4 @@ src/a1_cpp/src/mpc_osqp.cc
 
 
 src/pytorch_debug/libtorch
-src/go1_rl_cpp/go1_rl_controller/libtorch
+src/go1_rl_ctrl_cpp/libtorch
