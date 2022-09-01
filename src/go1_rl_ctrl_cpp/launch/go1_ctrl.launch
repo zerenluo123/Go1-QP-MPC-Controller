@@ -1,0 +1,8 @@
+<launch>
+    <arg name="type" default="gazebo"/>
+    <arg name="solver_type" default="mpc"/>
+
+<!--     <rosparam file="$(find a1_cpp)/config/$(arg type)_a1_$(arg solver_type).yaml" command="load"/> -->
+
+    <node pkg="go1_rl_ctrl_cpp" type="gazebo_go1_ctrl" name="gazebo_go1_ctrl" output="screen"/>
+</launch>
