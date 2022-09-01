@@ -24,12 +24,8 @@ bool Go1RLController::create(double dt) {
 }
 
 void Go1RLController::loadParameters() {
-//  if (  doc.LoadFile(ros::package::getPath("m545_rl_boom_controller") + "../config/parameters.xml") != 0) {
-//    ROS_WARN("[Go1RLController::loadParameters] Parameter file could not be loaded!\n");
-//  }
-
+  // use absoulte path
   yamlNode_ = YAML::LoadFile("/home/zerenluo/unitree_ros_ws/src/Go1-QP-MPC-Controller/src/go1_rl_ctrl_cpp/config/parameters.yaml");
-//  yamlNode_ = YAML::LoadFile(ros::package::getPath("go1_rl_ctrl_cpp") + "/config/parameters.yaml");
 
   ctrlWeights_ = yamlNode_["weights"].as<std::string>();
   ROS_INFO_STREAM("\033[1;33m[Go1RLController] Weights: " << ctrlWeights_ << "\033[0m");
