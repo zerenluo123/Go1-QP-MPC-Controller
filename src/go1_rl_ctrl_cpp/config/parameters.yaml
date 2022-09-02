@@ -1,3 +1,5 @@
+package_dir: /home/zerenluo/unitree_ros_ws/src/Go1-QP-MPC-Controller/src/go1_rl_ctrl_cpp
 
+use_sim_time: true # gazebo: true; hardware: false
 
 weights: cpp_model.pt

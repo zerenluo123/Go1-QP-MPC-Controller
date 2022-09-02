@@ -19,7 +19,7 @@
 
 class Go1RLController {
  public:
-  Go1RLController(ros::NodeHandle &nh, std::string &pkgDir);
+  Go1RLController(ros::NodeHandle &nh);
 
 //  // ! Destructor, used to terminate map thread if there is camera
 //  ~Go1RLController();
