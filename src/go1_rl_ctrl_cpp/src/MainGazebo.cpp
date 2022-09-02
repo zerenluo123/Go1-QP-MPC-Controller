@@ -22,7 +22,8 @@ int main(int argc, char **argv) {
   ros::NodeHandle nh;
 
   // create go1 rl controller
-  std::unique_ptr<Go1RLController> go1_rl = std::make_unique<Go1RLController>(nh);
+  std::string pkgDir = "/home/zerenluo/unitree_ros_ws/src/Go1-QP-MPC-Controller/src/go1_rl_ctrl_cpp";
+  std::unique_ptr<Go1RLController> go1_rl = std::make_unique<Go1RLController>(nh, pkgDir);
   go1_rl->create(0.1);
 
 

@@ -1,12 +1,8 @@
-cmake_minimum_required(VERSION 3.10.1)
+cmake_minimum_required(VERSION 3.16)
 project(go1_rl_ctrl_cpp)
-set(CMAKE_BUILD_TYPE "Release")
-#set(CMAKE_BUILD_TYPE "Debug")
-set(CMAKE_CXX_FLAGS "-std=c++14")
-set(CMAKE_CXX_STANDARD 14)
-#-DEIGEN_USE_MKL_ALL")
-set(CMAKE_CXX_FLAGS_RELEASE "-O3 -Wall -g")
 
+add_definitions(-std=c++14)
+set(CMAKE_CXX_FLAGS "-fPIC")
 #check environmental variables
 message(STATUS "CMAKE_PREFIX_PATH: ${CMAKE_PREFIX_PATH}")
 

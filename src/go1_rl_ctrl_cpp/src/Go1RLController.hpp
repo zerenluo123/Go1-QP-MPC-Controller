@@ -19,7 +19,7 @@
 
 class Go1RLController {
  public:
-  Go1RLController(ros::NodeHandle &_nh);
+  Go1RLController(ros::NodeHandle &nh, std::string &pkgDir);
 
 //  // ! Destructor, used to terminate map thread if there is camera
 //  ~Go1RLController();
@@ -39,6 +39,9 @@ class Go1RLController {
   bool cleanup();
 
  private:
+  ros::NodeHandle nh_;
+  std::string pkgDir_;
+
   //! YAML parsing of parameter file
   YAML::Node yamlNode_;
 
@@ -54,6 +57,9 @@ class Go1RLController {
 
   //! Parameter loading
   void loadParameters();
+
+  //! NN parameter loading
+  void loadNNparams();
 
 
 };
