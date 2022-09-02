@@ -27,23 +27,4 @@ int main(int argc, char **argv) {
   go1_rl->create(0.1);
 
 
-
-//  int stateDimension = 48; // rl_policy_module.py
-//
-//  torch::manual_seed(0);
-//
-//  torch::jit::script::Module studentModule;
-//
-//  studentModule = torch::jit::load("/home/zerenluo/unitree_ros_ws/src/Go1-QP-MPC-Controller/src/go1_rl_ctrl_cpp/src/cpp_model.pt"); // rl_policy_module.py
-//
-//  studentModule.to(torch::kCPU);
-//  studentModule.eval();
-//  torch::NoGradGuard no_grad_;
-//
-//  std::vector<torch::jit::IValue> T;
-//  T.push_back(torch::ones({stateDimension}));
-//
-//  auto actionTensor = studentModule.forward(T).toTensor();
-//
-//  std::cout << actionTensor << std::endl;
 }

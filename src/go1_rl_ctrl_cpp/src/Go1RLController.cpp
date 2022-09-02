@@ -40,7 +40,7 @@ void Go1RLController::loadParameters() {
 
 void Go1RLController::loadNNparams() {
   policy_.load(pkgDir_ + "/resource/cpp_model.pt");
-  ROS_INFO_STREAM("\033[1;33m[Go1RLController::loadNNparams] load policy weights ");
+  ROS_INFO_STREAM("[Go1RLController::loadNNparams] load policy weights ");
 
   // test for loading
   auto input = Eigen::VectorXf::Ones(48);
