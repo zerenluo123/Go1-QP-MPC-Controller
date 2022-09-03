@@ -23,21 +23,21 @@ a1_default_foot_pos_RR_x: -0.17
 a1_default_foot_pos_RR_y: -0.15
 a1_default_foot_pos_RR_z: -0.35
 
-a1_gait_counter_speed_FL: 2.0
-a1_gait_counter_speed_FR: 2.0
-a1_gait_counter_speed_RL: 2.0
-a1_gait_counter_speed_RR: 2.0
+a1_gait_counter_speed_FL: 0.7
+a1_gait_counter_speed_FR: 0.7
+a1_gait_counter_speed_RL: 0.7
+a1_gait_counter_speed_RR: 0.7
 
 # foot swing controller parameters
 # force_tgt = km_foot * kp_foot * foot_pos_error
 
-a1_kp_foot_x: 300.0
-a1_kp_foot_y: 400.0
-a1_kp_foot_z: 400.0
+a1_kp_foot_x: 200.0
+a1_kp_foot_y: 300.0
+a1_kp_foot_z: 200.0
 
-a1_kd_foot_x: 8.0
-a1_kd_foot_y: 8.0
-a1_kd_foot_z: 8.0
+a1_kd_foot_x: 4.0
+a1_kd_foot_y: 4.0
+a1_kd_foot_z: 4.0
 
 a1_km_foot_x: 0.1
 a1_km_foot_y: 0.1

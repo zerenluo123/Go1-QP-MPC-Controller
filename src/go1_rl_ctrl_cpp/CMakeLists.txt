@@ -38,6 +38,15 @@ include_directories(
 link_directories($ENV{UNITREE_LEGGED_SDK_PATH}/lib/cpp/amd64)
 set(EXTRA_LIBS -pthread libunitree_legged_sdk.so)
 
+# Declare cpp libraries
+# common robot controller every type of robots need
+add_library(go1_lib
+        src/Go1Params.hpp
+        src/Go1CtrlStates.hpp
+        src/utils/Utils.h
+        src/utils/Utils.cpp)
+target_link_libraries(go1_lib ${catkin_LIBRARIES})
+
 #target_link_libraries(${PACKAGE_NAME} /usr/lib/x86_64-linux-gnu/libtinyxml2.so)
 
 ############################
@@ -51,13 +60,19 @@ add_library(torch_eigen STATIC src/torch_eigen/TorchEigen.cpp)
 target_link_libraries(torch_eigen "${TORCH_LIBRARIES}")
 set_property(TARGET torch_eigen PROPERTY CXX_STANDARD 14)
 
-# Declare cpp libraries
-# common robot controller every type of robots need
+
+
+
+
+# lib of different types of robots
 add_library(gazebo_go1_lib
         src/Go1RLController.hpp
         src/Go1RLController.cpp
         )
-target_link_libraries(gazebo_go1_lib torch_eigen libyaml-cpp.so)
+target_link_libraries(gazebo_go1_lib
+        go1_lib
+        torch_eigen
+        libyaml-cpp.so)
 
 
 # Declare a cpp executable for gazebo robot
