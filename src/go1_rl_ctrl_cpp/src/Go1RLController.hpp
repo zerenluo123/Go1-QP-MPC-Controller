@@ -10,10 +10,6 @@
 #include "yaml-cpp/yaml.h"
 
 #include <ros/ros.h>
-#include <sensor_msgs/Joy.h>
-#include <sensor_msgs/Imu.h>
-#include <sensor_msgs/JointState.h>
-#include <ros/package.h>
 
 #include <unordered_map>
 
@@ -21,6 +17,9 @@
 
 // control parameters
 #include "Go1Params.hpp"
+
+#include "observation/go1Observation.hpp"
+
 
 class Go1RLController {
  public:
@@ -51,22 +50,7 @@ class Go1RLController {
 
  private:
   ros::NodeHandle nh_;
-  ros::Subscriber sub_joy_msg_;
   std::string pkgDir_;
-
-  // joystick command
-  double joy_cmd_velx_ = 0.0;
-  double joy_cmd_vely_ = 0.0;
-  double joy_cmd_velz_ = 0.0;
-
-  double joy_cmd_yaw_rate_ = 0.0;
-
-  double joy_cmd_body_height_ = 0.3;
-
-  //  0 is standing, 1 is walking
-  int joy_cmd_ctrl_state_ = 0;
-  int prev_joy_cmd_ctrl_state_ = 0;
-  bool joy_cmd_exit_ = false;
 
   //! YAML parsing of parameter file
   YAML::Node yamlNode_;
@@ -86,6 +70,9 @@ class Go1RLController {
 
   //! NN parameter loading
   void loadNNparams();
+
+  //! observation
+  std::unique_ptr<Go1Observation> go1Obs_;
 
 
 };

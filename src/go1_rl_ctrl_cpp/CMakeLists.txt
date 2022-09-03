@@ -44,7 +44,8 @@ add_library(go1_lib
         src/Go1Params.hpp
         src/Go1CtrlStates.hpp
         src/utils/Utils.h
-        src/utils/Utils.cpp)
+        src/utils/Utils.cpp
+        src/observation/go1Observation.hpp)
 target_link_libraries(go1_lib ${catkin_LIBRARIES})
 
 #target_link_libraries(${PACKAGE_NAME} /usr/lib/x86_64-linux-gnu/libtinyxml2.so)

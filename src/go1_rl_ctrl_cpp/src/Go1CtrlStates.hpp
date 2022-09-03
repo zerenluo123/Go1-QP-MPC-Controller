@@ -329,7 +329,7 @@ public:
     int stance_leg_control_type; // 0: QP, 1: MPC
     int movement_mode;  // 0: standstill, 1: start to locomote
     int use_terrain_adapt; 
-    double control_dt = MAIN_UPDATE_FREQUENCY / 1000.0;
+    double control_dt = ACTION_UPDATE_FREQUENCY / 1000.0;
 
     // period of one gait cycle
     double plan_dt;

@@ -10,7 +10,8 @@ Go1RLController::Go1RLController(ros::NodeHandle &nh) {
   ros::param::get("package_dir", pkgDir_);
   ros::param::get("weights", ctrlWeights_);
 
-  sub_joy_msg_ = nh.subscribe("/joy", 1000, &Go1RLController::joy_callback, this);
+  // observation
+  go1Obs_ = std::make_unique<Go1Observation>(nh);
 
 }
 
@@ -23,10 +24,7 @@ bool Go1RLController::create(double dt) {
   //! load NN parameter
   loadNNparams();
 
-  //! initialize observations & actions
-
   return true;
-
 }
 
 void Go1RLController::loadNNparams() {
@@ -34,7 +32,6 @@ void Go1RLController::loadNNparams() {
 
   policy_.load(pkgDir_ + "/resource/" + ctrlWeights_);
   ROS_INFO_STREAM("[Go1RLController::loadNNparams] load policy weights ");
-
 
 
 }
@@ -50,25 +47,6 @@ bool Go1RLController::advance(double dt) {
 
 }
 
-
-void Go1RLController::
-joy_callback(const sensor_msgs::Joy::ConstPtr &joy_msg) {
-//  // left updown: change body height, not need now
-//  joy_cmd_velz = joy_msg->axes[1] * JOY_CMD_BODY_HEIGHT_VEL;
-
-  // right updown
-  joy_cmd_velx_ = joy_msg->axes[4] * JOY_CMD_VELX_MAX;
-  // right horiz
-  joy_cmd_vely_ = joy_msg->axes[3] * JOY_CMD_VELY_MAX;
-  // left horiz
-  joy_cmd_yaw_rate_ = joy_msg->axes[0] * JOY_CMD_YAW_MAX;
-
-  // lb
-  if (joy_msg->buttons[4] == 1) {
-    std::cout << "You have pressed the exit button!!!!" << std::endl;
-    joy_cmd_exit_ = true;
-  }
-}
 
 //bool Go1RLController::send_cmd() {
 //  _root_control.compute_joint_torques(a1_ctrl_states);
