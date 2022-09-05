@@ -24,8 +24,9 @@
 
 #include "../Go1Params.hpp"
 #include "../Go1CtrlStates.hpp"
-#include "../utils/Utils.h"
+#include "../utils/Utils.hpp"
 #include "../utils/filter.hpp"
+#include "../EKF/Go1BasicEKF.hpp"
 
 
 // TODO: compute the observation vector as the one in issac gym legged_robot.py
@@ -72,14 +73,34 @@ class Go1Observation{
     gyro_x_ = MovingWindowFilter(5);
     gyro_y_ = MovingWindowFilter(5);
     gyro_z_ = MovingWindowFilter(5);
+
+    // init default joint pos
+    go1_ctrl_states_.joint_pos = go1_ctrl_states_.default_joint_pos;
   }
 
-  void updateObservation() {
+  void updateObservation(double dt) {
     // TODO: get all observation from measurement and concat
+    // update state estimation, include base position and base velocity(world frame)
+    if (!go1_estimate_.is_inited()) {
+      go1_estimate_.init_state(go1_ctrl_states_);
+    } else {
+      go1_estimate_.update_estimation(go1_ctrl_states_, dt);
+    }
 
+    // assign observation vector
+    obDouble_.segment(0, 3) = go1_ctrl_states_.root_rot_mat.transpose() * go1_ctrl_states_.root_lin_vel; // 1. base linear velocity(robot frame)
+    obDouble_.segment(3, 3) = go1_ctrl_states_.imu_ang_vel; // 2. base angular velocity(robot frame, [roll, pitch, yaw])
+    obDouble_.segment(6, 3) = go1_ctrl_states_.root_rot_mat.transpose() * Eigen::Vector3d::UnitZ(); // 3. projected gravity(projected z unit vector)
+    obDouble_.segment(9, 3) << joy_cmd_velx_, joy_cmd_vely_, joy_cmd_yaw_rate_; // 4. command([cmd_velx, cmd_vely, cmd_ang_vel_yaw])
+    obDouble_.segment(12, 12) = go1_ctrl_states_.joint_pos - go1_ctrl_states_.default_joint_pos; // 5. (joint_pos - default_joint_pos)
+    obDouble_.segment(24, 12) = go1_ctrl_states_.joint_vel; // 6. joint_vel
+    obDouble_.segment(36, 12) = go1_ctrl_states_.joint_actions; // 7. actions(clipped NN outputs)
+
+    // scale the observation
 
 
   }
+
 
   void joy_callback(const sensor_msgs::Joy::ConstPtr &joy_msg) { // This function applies for both gazebo and hardware
 //  // left updown: change body height, not need now
@@ -242,6 +263,7 @@ class Go1Observation{
   Eigen::VectorXd commandScale_;
 
   Go1CtrlStates go1_ctrl_states_;
+  Go1BasicEKF go1_estimate_;
 
   // filters
   MovingWindowFilter acc_x_;

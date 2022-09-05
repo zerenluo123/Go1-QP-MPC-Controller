@@ -18,7 +18,7 @@
 // control parameters
 #include "Go1Params.hpp"
 
-#include "observation/go1Observation.hpp"
+#include "observation/Go1Observation.hpp"
 
 
 class Go1RLController {

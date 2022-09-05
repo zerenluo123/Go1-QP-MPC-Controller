@@ -43,9 +43,11 @@ set(EXTRA_LIBS -pthread libunitree_legged_sdk.so)
 add_library(go1_lib
         src/Go1Params.hpp
         src/Go1CtrlStates.hpp
-        src/utils/Utils.h
+        src/utils/Utils.hpp
         src/utils/Utils.cpp
-        src/observation/go1Observation.hpp)
+        src/EKF/Go1BasicEKF.hpp
+        src/EKF/Go1BasicEKF.cpp
+        src/observation/Go1Observation.hpp)
 target_link_libraries(go1_lib ${catkin_LIBRARIES})
 
 #target_link_libraries(${PACKAGE_NAME} /usr/lib/x86_64-linux-gnu/libtinyxml2.so)

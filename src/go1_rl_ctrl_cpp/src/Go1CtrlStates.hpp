@@ -71,6 +71,7 @@ public:
 
         joint_pos.setZero();
         joint_vel.setZero();
+        default_joint_pos.setZero(); // TODO: check if need to set it as training default?
 
         walking_surface_height_tmp = 0;
         walking_surface_height = 0;
@@ -127,6 +128,7 @@ public:
 
         torques_gravity << 0.80, 0, 0, -0.80, 0, 0, 0.80, 0, 0, -0.80, 0, 0;
         joint_torques.setZero();
+        joint_actions.setZero();
 
         power_level = 5;
     }
@@ -385,6 +387,8 @@ public:
 
     Eigen::Matrix<double, NUM_DOF, 1> joint_pos;
     Eigen::Matrix<double, NUM_DOF, 1> joint_vel;
+    Eigen::Matrix<double, NUM_DOF, 1> default_joint_pos;
+
 
     double walking_surface_height_tmp;
     double walking_surface_height;
@@ -432,8 +436,10 @@ public:
 
     Eigen::Matrix<double, NUM_DOF, 1> torques_gravity;
     Eigen::Matrix<double, NUM_DOF, 1> joint_torques;
+    Eigen::Matrix<double, NUM_DOF, 1> joint_actions;
 
-    // IMU sensor data
+
+  // IMU sensor data
     Eigen::Vector3d imu_acc;
     Eigen::Vector3d imu_ang_vel;
 

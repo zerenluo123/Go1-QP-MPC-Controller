@@ -21,6 +21,10 @@ int main(int argc, char **argv) {
   ros::init(argc, argv, "gazebo_go1_rl_ctrl");
   ros::NodeHandle nh;
 
+  // change ros logger
+  if (ros::console::set_logger_level(ROSCONSOLE_DEFAULT_NAME, ros::console::levels::Debug)) {
+    ros::console::notifyLoggerLevelsChanged();
+  }
 
   // make sure the ROS infra using sim time, otherwise the controller cannot run with correct time steps
   bool use_sim_time;

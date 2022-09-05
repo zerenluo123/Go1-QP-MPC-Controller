@@ -2,7 +2,7 @@
 // Created by shuoy on 10/19/21.
 //
 
-#include "Utils.h"
+#include "Utils.hpp"
 
 Eigen::Vector3d Utils::quat_to_euler(Eigen::Quaterniond quat) {
     Eigen::Vector3d rst;
