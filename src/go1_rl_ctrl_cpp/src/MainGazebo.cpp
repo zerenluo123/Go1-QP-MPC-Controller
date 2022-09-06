@@ -67,23 +67,29 @@ int main(int argc, char **argv) {
 
   });
 
-//  // Thread 2: depolyment on the real system; send commands
-//  std::cout << "Enter thread 2: Deployment on the real robot, sending command" << std::endl;
-//  std::thread deploy_thread([&]() {
-//    while (control_execute.load(std::memory_order_acquire) && ros::ok()) {
-//      ros::Duration(DEPLOYMENT_FREQUENCY / 1000).sleep();
-//
-//      bool send_cmd_running = go1_rl->send_cmd();
-//
-//      if (!send_cmd_running) {
-//        std::cout << "Thread 2 loop is terminated because of errors." << std::endl;
-//        ros::shutdown();
-//        std::terminate();
-//        break;
-//      }
-//
-//    }
-//  });
+  // Thread 2: depolyment on the real system; send commands
+  std::cout << "Enter thread 2: Deployment on the real robot, sending command" << std::endl;
+  std::thread deploy_thread([&]() {
+    while (control_execute.load(std::memory_order_acquire) && ros::ok()) {
+      ros::Duration(DEPLOYMENT_FREQUENCY / 1000).sleep();
+
+      auto t3 = std::chrono::high_resolution_clock::now();
+
+      bool send_cmd_running = go1_rl->send_cmd();
+
+      auto t4 = std::chrono::high_resolution_clock::now();
+      std::chrono::duration<double, std::milli> ms_double = t4 - t3;
+      std::cout << "Thread 2 is updated in " << ms_double.count() << "ms" << std::endl;
+
+      if (!send_cmd_running) {
+        std::cout << "Thread 2 loop is terminated because of errors." << std::endl;
+        ros::shutdown();
+        std::terminate();
+        break;
+      }
+
+    }
+  });
 
   ros::AsyncSpinner spinner(12);
   spinner.start();

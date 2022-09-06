@@ -36,13 +36,23 @@ class Go1Observation{
     obDim_ = 36;
     obDouble_.setZero(obDim_); obScaled_.setZero(obDim_);
 
-    linVelScale_ = 2.0;
-    angVelScale_ = 0.25;
-    dofPosScale_ = 1.0;
-    dofVelScale_ = 0.05;
-    commandScale_.setZero(3); // for cmd_velx, cmd_vely, cmd_ang_vel_yaw
-    commandScale_ << linVelScale_, linVelScale_, angVelScale_;
+    // scale factor init
+    linVelScale_.setZero();
+    angVelScale_.setZero();
+    gravityScale_.setZero();
+    commandScale_.setZero();
+    linVelScale_ << 2.0, 2.0, 2.0;
+    angVelScale_ << 0.25, 0.25, 0.25;
+    gravityScale_ << 1.0, 1.0, 1.0; // projected gravity
+    commandScale_ << 2.0, 2.0, 0.25; // for cmd_velx, cmd_vely, cmd_ang_vel_yaw
 
+    dofPosScale_.setZero(12);  dofVelScale_.setZero(12);
+    for (int i = 0; i < 12; i++) {
+      dofPosScale_[i] = 1.0;
+      dofVelScale_[i] = 0.05;
+    }
+    scaleFactor_.setZero(obDim_);
+    scaleFactor_ << linVelScale_, angVelScale_, gravityScale_, commandScale_, dofPosScale_, dofVelScale_;
 
     // ROS register callback, call backs directly modify variables in Go1CtrlStates
     sub_gt_pose_msg_ = nh.subscribe("/torso_odom", 100, &Go1Observation::gt_pose_callback, this);
@@ -74,8 +84,8 @@ class Go1Observation{
     gyro_y_ = MovingWindowFilter(5);
     gyro_z_ = MovingWindowFilter(5);
 
-    // init default joint pos
-    go1_ctrl_states_.joint_pos = go1_ctrl_states_.default_joint_pos;
+//    // init default joint pos
+//    go1_ctrl_states_.joint_pos = go1_ctrl_states_.default_joint_pos;
   }
 
   void updateObservation(double dt) {
@@ -96,14 +106,17 @@ class Go1Observation{
     obDouble_.segment(24, 12) = go1_ctrl_states_.joint_vel; // 6. joint_vel
 //    obDouble_.segment(36, 12) = go1_ctrl_states_.joint_actions; // 7. actions(clipped NN outputs)
 
-//    std::cout << obDouble_ << std::endl;
-
     // scale the observation
+    for (int i = 0; i < obDouble_.size(); i++) {
+      obScaled_[i] = obDouble_[i] * scaleFactor_[i];
+    }
 
+    // clip the observation
+    Utils::clip(obScaled_, -clipObs_, clipObs_);
 
   }
 
-  Eigen::VectorXd getObservation() { return obDouble_; }
+  Eigen::VectorXd getObservation() { return obScaled_; }
 
   void joy_callback(const sensor_msgs::Joy::ConstPtr &joy_msg) { // This function applies for both gazebo and hardware
 //  // left updown: change body height, not need now
@@ -262,8 +275,10 @@ class Go1Observation{
   Eigen::VectorXd obDouble_, obScaled_;
   Eigen::VectorXd actionMean_, actionStd_, obMean_, obStd_;
 
-  double linVelScale_, angVelScale_, dofPosScale_, dofVelScale_;
-  Eigen::VectorXd commandScale_;
+  Eigen::Vector3d linVelScale_, angVelScale_, gravityScale_, commandScale_;
+  Eigen::VectorXd dofPosScale_, dofVelScale_;
+  Eigen::VectorXd scaleFactor_;
+  double clipObs_ = 100.;
 
   Go1CtrlStates go1_ctrl_states_;
   Go1BasicEKF go1_estimate_;
@@ -289,8 +304,5 @@ class Go1Observation{
   int joy_cmd_ctrl_state_ = 0;
   int prev_joy_cmd_ctrl_state_ = 0;
   bool joy_cmd_exit_ = false;
-
-
-
 
 };

@@ -3,6 +3,10 @@
 //
 
 #pragma once
+#include <cstdint>
+#include <algorithm>
+#include <iostream>
+#include <iomanip>
 
 #include <Eigen/Core>
 
@@ -11,13 +15,10 @@
 
 #include <ros/ros.h>
 
-#include <unordered_map>
-
 #include "torch_eigen/TorchEigen.hpp"
 
 // control parameters
 #include "Go1Params.hpp"
-
 #include "observation/Go1Observation.hpp"
 
 
@@ -52,6 +53,12 @@ class Go1RLController {
   ros::NodeHandle nh_;
   std::string pkgDir_;
 
+  // 0,  1,  2: FL_hip, FL_thigh, FL_calf
+  // 3,  4,  5: FR_hip, FR_thigh, FR_calf
+  // 6,  7,  8: RL_hip, RL_thigh, RL_calf
+  // 9, 10, 11: RR_hip, RR_thigh, RR_calf
+  ros::Publisher pub_joint_cmd_[12];
+
   //! YAML parsing of parameter file
   YAML::Node yamlNode_;
 
@@ -59,9 +66,7 @@ class Go1RLController {
   std::unordered_map<std::string, Eigen::VectorXd> obsMap_;
   Eigen::VectorXd prevActionDouble_, actionDouble_; // double
   Eigen::VectorXf action_; // float
-
-
-  void updateObservations();
+  Eigen::VectorXd torques_;
 
   //! controller/policy
   TorchEigen policy_;
@@ -75,6 +80,11 @@ class Go1RLController {
 
   //! observation
   std::unique_ptr<Go1Observation> go1Obs_;
+
+  double clipAction_ = 100.;
+  double actionScale_ = 0.25;
+  double stiffness_ = 20.;
+  double damping_ = 0.5;
 
 
 };

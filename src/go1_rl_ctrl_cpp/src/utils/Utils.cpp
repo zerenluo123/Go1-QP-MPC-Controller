@@ -105,3 +105,11 @@ double BezierUtils::bezier_curve(double t, const std::vector<double> &P) {
     }
     return y;
 }
+
+
+// clip function for a vector
+void Utils::clip(Eigen::VectorXd& target, const double& lower, const double& upper) {
+  for (int i = 0; i < target.size(); i++) {
+    target[i] = std::clamp(target[i], lower, upper);
+  }
+}

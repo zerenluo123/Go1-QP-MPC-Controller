@@ -72,6 +72,10 @@ public:
         joint_pos.setZero();
         joint_vel.setZero();
         default_joint_pos.setZero(); // TODO: check if need to set it as training default?
+        default_joint_pos << 0.1, 0.8, -1.5, // FL_hip, FL_thigh, FL_calf
+            -0.1, 0.8, -1.5, // FR_hip, FR_thigh, FR_calf
+            0.1, 1.0, -1.5, // RL_hip, RL_thigh, RL_calf
+            -0.1, 1.0, -1.5; // RR_hip, RR_thigh, RR_calf
 
         walking_surface_height_tmp = 0;
         walking_surface_height = 0;

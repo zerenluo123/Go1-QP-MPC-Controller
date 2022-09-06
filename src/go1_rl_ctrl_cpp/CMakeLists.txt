@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 project(go1_rl_ctrl_cpp)
 
-add_definitions(-std=c++14)
+add_definitions(-std=c++17)
 set(CMAKE_CXX_FLAGS "-fPIC")
 #check environmental variables
 message(STATUS "CMAKE_PREFIX_PATH: ${CMAKE_PREFIX_PATH}")
