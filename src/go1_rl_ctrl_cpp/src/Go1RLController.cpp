@@ -10,6 +10,7 @@ Go1RLController::Go1RLController(ros::NodeHandle &nh) {
   ros::param::get("package_dir", pkgDir_);
   ros::param::get("weights", ctrlWeights_);
 
+  actionDouble_.setZero(12);  prevActionDouble_.setZero(12);  action_.setZero(12);
   // observation
   go1Obs_ = std::make_unique<Go1Observation>(nh);
 
@@ -37,11 +38,24 @@ void Go1RLController::loadNNparams() {
 }
 
 bool Go1RLController::advance(double dt) {
-  // test for loading
-  auto input = Eigen::VectorXf::Ones(48);
-  Eigen::VectorXf output;
-  policy_.run(input, output);
-  std::cout << output << std::endl;
+  // updata obs except for actions
+  go1Obs_->updateObservation(dt);
+  Eigen::VectorXd proprioObs = go1Obs_->getObservation(); // dim=36
+
+  // put in action
+  Eigen::VectorXf obs(proprioObs.size() + 12); // full observation; dim=48
+  obs << proprioObs.cast<float>(), prevActionDouble_.cast<float>();
+//  auto input = Eigen::VectorXf::Ones(48);
+//  Eigen::VectorXf output;
+//  policy_.run(input, output);
+//  std::cout << output << std::endl;
+
+  policy_.run(obs, action_);
+  actionDouble_ = action_.cast<double>();
+  prevActionDouble_ = actionDouble_;
+
+  std::cout << actionDouble_ << std::endl;
+
 
   return true;
 

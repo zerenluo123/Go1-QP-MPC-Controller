@@ -33,7 +33,7 @@
 class Go1Observation{
  public:
   Go1Observation(ros::NodeHandle &nh) {
-    obDim_ = 48;
+    obDim_ = 36;
     obDouble_.setZero(obDim_); obScaled_.setZero(obDim_);
 
     linVelScale_ = 2.0;
@@ -94,13 +94,16 @@ class Go1Observation{
     obDouble_.segment(9, 3) << joy_cmd_velx_, joy_cmd_vely_, joy_cmd_yaw_rate_; // 4. command([cmd_velx, cmd_vely, cmd_ang_vel_yaw])
     obDouble_.segment(12, 12) = go1_ctrl_states_.joint_pos - go1_ctrl_states_.default_joint_pos; // 5. (joint_pos - default_joint_pos)
     obDouble_.segment(24, 12) = go1_ctrl_states_.joint_vel; // 6. joint_vel
-    obDouble_.segment(36, 12) = go1_ctrl_states_.joint_actions; // 7. actions(clipped NN outputs)
+//    obDouble_.segment(36, 12) = go1_ctrl_states_.joint_actions; // 7. actions(clipped NN outputs)
+
+//    std::cout << obDouble_ << std::endl;
 
     // scale the observation
 
 
   }
 
+  Eigen::VectorXd getObservation() { return obDouble_; }
 
   void joy_callback(const sensor_msgs::Joy::ConstPtr &joy_msg) { // This function applies for both gazebo and hardware
 //  // left updown: change body height, not need now

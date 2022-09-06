@@ -57,7 +57,9 @@ class Go1RLController {
 
   //! observations & actions
   std::unordered_map<std::string, Eigen::VectorXd> obsMap_;
-  Eigen::VectorXd obDouble_, actDouble_;
+  Eigen::VectorXd prevActionDouble_, actionDouble_; // double
+  Eigen::VectorXf action_; // float
+
 
   void updateObservations();
 
