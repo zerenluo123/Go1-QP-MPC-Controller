@@ -65,7 +65,7 @@ bool Go1RLController::advance(double dt) {
   actionDouble_ = action_.cast<double>();
 
   // add clip to the action(should be of little use)
-  Utils::clip(actionDouble_, -clipAction_, clipAction_);
+  actionDouble_ = actionDouble_.cwiseMin(clipAction_).cwiseMax(-clipAction_);
 
   prevActionDouble_ = actionDouble_;
 //  std::cout << actionDouble_ << std::endl;

@@ -90,12 +90,12 @@ class Go1Observation{
 
   void updateObservation(double dt) {
     // TODO: get all observation from measurement and concat
-    // update state estimation, include base position and base velocity(world frame)
-    if (!go1_estimate_.is_inited()) {
-      go1_estimate_.init_state(go1_ctrl_states_);
-    } else {
-      go1_estimate_.update_estimation(go1_ctrl_states_, dt);
-    }
+//    // update state estimation, include base position and base velocity(world frame)
+//    if (!go1_estimate_.is_inited()) {
+//      go1_estimate_.init_state(go1_ctrl_states_);
+//    } else {
+//      go1_estimate_.update_estimation(go1_ctrl_states_, dt);
+//    }
 
     // assign observation vector
     obDouble_.segment(0, 3) = go1_ctrl_states_.root_rot_mat.transpose() * go1_ctrl_states_.root_lin_vel; // 1. base linear velocity(robot frame)
@@ -112,7 +112,7 @@ class Go1Observation{
     }
 
     // clip the observation
-    Utils::clip(obScaled_, -clipObs_, clipObs_);
+    obScaled_ = obScaled_.cwiseMin(clipObs_).cwiseMax(-clipObs_);
 
   }
 
@@ -149,10 +149,10 @@ class Go1Observation{
     // go1_ctrl_states_.root_pos << odom->pose.pose.position.x,
     //         odom->pose.pose.position.y,
     //         odom->pose.pose.position.z;
-    // // make sure root_lin_vel is in world frame
-    // go1_ctrl_states_.root_lin_vel << odom->twist.twist.linear.x,
-    //         odom->twist.twist.linear.y,
-    //         odom->twist.twist.linear.z;
+     // make sure root_lin_vel is in world frame
+     go1_ctrl_states_.root_lin_vel << odom->twist.twist.linear.x,
+             odom->twist.twist.linear.y,
+             odom->twist.twist.linear.z;
 
     // make sure root_ang_vel is in world frame
     // go1_ctrl_states_.root_ang_vel << odom->twist.twist.angular.x,
