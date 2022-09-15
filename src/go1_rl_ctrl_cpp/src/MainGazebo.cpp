@@ -21,6 +21,10 @@ int main(int argc, char **argv) {
   ros::init(argc, argv, "gazebo_go1_rl_ctrl");
   ros::NodeHandle nh;
 
+  double action_update_frequency, deployment_frequency;
+  ros::param::get("action_update_frequency", action_update_frequency);
+  ros::param::get("deployment_frequency", deployment_frequency);
+
   // change ros logger
   if (ros::console::set_logger_level(ROSCONSOLE_DEFAULT_NAME, ros::console::levels::Debug)) {
     ros::console::notifyLoggerLevelsChanged();
@@ -45,17 +49,31 @@ int main(int argc, char **argv) {
   // Thread 1: compute command, forward the NN policy network
   std::cout << "Enter thread 1: compute desired action command" << std::endl;
   std::thread compute_action_thread([&]() {
-    while (control_execute.load(std::memory_order_acquire) && ros::ok()) {
-      ros::Duration(ACTION_UPDATE_FREQUENCY / 1000).sleep();
+    // prepare variables to monitor time and control the while loop
+    ros::Time start = ros::Time::now();
+    ros::Time prev = ros::Time::now();
+    ros::Time now = ros::Time::now();  // bool res = app.exec();
+    ros::Duration dt(0);
 
+    while (control_execute.load(std::memory_order_acquire) && ros::ok()) {
       auto t1 = std::chrono::high_resolution_clock::now();
 
+      ros::Duration(action_update_frequency / 1000).sleep();
+
+      // get t and dt
+      now = ros::Time::now();
+      dt = now - prev;
+      prev = now;
+//      std::cout << "dt in thread 1 " << dt.toSec() << "ms" << std::endl;
+
+
+
       // compute actions
-      bool running = go1_rl->advance(0.1);
+      bool running = go1_rl->advance(dt.toSec());
 
       auto t2 = std::chrono::high_resolution_clock::now();
       std::chrono::duration<double, std::milli> ms_double = t2 - t1;
-      std::cout << "RL solution is updated in " << ms_double.count() << "ms" << std::endl;
+      std::cout << "thread 1 solution is updated in " << ms_double.count() << "ms" << std::endl;
 
       if (!running) {
         std::cout << "Thread 1 loop is terminated because of errors." << std::endl;
@@ -71,9 +89,9 @@ int main(int argc, char **argv) {
   std::cout << "Enter thread 2: Deployment on the real robot, sending command" << std::endl;
   std::thread deploy_thread([&]() {
     while (control_execute.load(std::memory_order_acquire) && ros::ok()) {
-      ros::Duration(DEPLOYMENT_FREQUENCY / 1000).sleep();
-
       auto t3 = std::chrono::high_resolution_clock::now();
+
+      ros::Duration(deployment_frequency / 1000).sleep();
 
       bool send_cmd_running = go1_rl->send_cmd();
 

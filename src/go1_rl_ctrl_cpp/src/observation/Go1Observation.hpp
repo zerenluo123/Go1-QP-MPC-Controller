@@ -74,6 +74,11 @@ class Go1Observation{
     sub_joint_msg_[10] = nh.subscribe("/go1_gazebo/RR_thigh_controller/state", 2, &Go1Observation::RR_thigh_state_callback, this);
     sub_joint_msg_[11] = nh.subscribe("/go1_gazebo/RR_calf_controller/state", 2, &Go1Observation::RR_calf_state_callback, this);
 
+    sub_foot_contact_msg_[0] = nh.subscribe("/visual/FL_foot_contact/the_force", 2, &Go1Observation::FL_foot_contact_callback, this);
+    sub_foot_contact_msg_[1] = nh.subscribe("/visual/FR_foot_contact/the_force", 2, &Go1Observation::FR_foot_contact_callback, this);
+    sub_foot_contact_msg_[2] = nh.subscribe("/visual/RL_foot_contact/the_force", 2, &Go1Observation::RL_foot_contact_callback, this);
+    sub_foot_contact_msg_[3] = nh.subscribe("/visual/RR_foot_contact/the_force", 2, &Go1Observation::RR_foot_contact_callback, this);
+
     sub_joy_msg_ = nh.subscribe("/joy", 1000, &Go1Observation::joy_callback, this);
 
     // don't know if filter is needed
@@ -253,7 +258,22 @@ class Go1Observation{
     go1_ctrl_states_.joint_vel[11] = go1_joint_state.dq;
   }
 
+  // foot contact force
+  void FL_foot_contact_callback(const geometry_msgs::WrenchStamped &force) {
+    go1_ctrl_states_.foot_force[0] = force.wrench.force.z;
+  }
 
+  void FR_foot_contact_callback(const geometry_msgs::WrenchStamped &force) {
+    go1_ctrl_states_.foot_force[1] = force.wrench.force.z;
+  }
+
+  void RL_foot_contact_callback(const geometry_msgs::WrenchStamped &force) {
+    go1_ctrl_states_.foot_force[2] = force.wrench.force.z;
+  }
+
+  void RR_foot_contact_callback(const geometry_msgs::WrenchStamped &force) {
+    go1_ctrl_states_.foot_force[3] = force.wrench.force.z;
+  }
 
 
 

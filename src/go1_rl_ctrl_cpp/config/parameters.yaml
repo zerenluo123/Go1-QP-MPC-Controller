@@ -3,3 +3,7 @@ package_dir: /home/zerenluo/unitree_ros_ws/src/Go1-QP-MPC-Controller/src/go1_rl_
 use_sim_time: true # gazebo: true; hardware: false
 
 weights: cpp_model.pt
+
+action_update_frequency: 0.1 # ms
+
+deployment_frequency: 0.1 # ms
