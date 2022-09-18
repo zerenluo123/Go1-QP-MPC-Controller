@@ -32,6 +32,9 @@ Go1RLController::Go1RLController(ros::NodeHandle &nh) {
   // observation
   go1Obs_ = std::make_unique<Go1Observation>(nh);
 
+  // publish observation
+  pub_obs_ = nh.advertise<unitree_legged_msgs::Observation>("/gazebo_go1/observation", 1);
+
 }
 
 bool Go1RLController::create(double dt) {
@@ -75,6 +78,10 @@ bool Go1RLController::advance(double dt) {
   // pos: proprioObs.segment(12, 12); vel: proprioObs.segment(24, 12)
   torques_ = stiffness_ * (actionScaled - proprioObs.segment(12, 12)) - damping_ * proprioObs.segment(24, 12);
 
+
+  // *********** debug **********
+  send_obs(obs);
+
   return true;
 
 }
@@ -98,3 +105,40 @@ bool Go1RLController::send_cmd() {
   return true;
 }
 
+void Go1RLController::send_obs(Eigen::VectorXf &obs) {
+  // publish the observation
+  unitree_legged_msgs::Observation obs_msg;
+
+  obs_msg.lin_vel_x = obs[0];
+  obs_msg.lin_vel_y = obs[1];
+  obs_msg.lin_vel_z = obs[2];
+
+  obs_msg.ang_vel_x = obs[3];
+  obs_msg.ang_vel_y = obs[4];
+  obs_msg.ang_vel_z = obs[5];
+
+  obs_msg.gravity_x = obs[6];
+  obs_msg.gravity_y = obs[7];
+  obs_msg.gravity_z = obs[8];
+
+  obs_msg.cmd_vel_x = obs[9];
+  obs_msg.cmd_vel_y = obs[10];
+  obs_msg.cmd_vel_z = obs[11];
+
+  obs_msg.pos_FL_hip = obs[12];   obs_msg.pos_FL_thigh = obs[13];   obs_msg.pos_FL_calf = obs[14];
+  obs_msg.pos_FR_hip = obs[15];   obs_msg.pos_FR_thigh = obs[16];   obs_msg.pos_FR_calf = obs[17];
+  obs_msg.pos_RL_hip = obs[18];   obs_msg.pos_RL_thigh = obs[19];   obs_msg.pos_RL_calf = obs[20];
+  obs_msg.pos_RR_hip = obs[21];   obs_msg.pos_RR_thigh = obs[22];   obs_msg.pos_RR_calf = obs[23];
+
+  obs_msg.vel_FL_hip = obs[24];   obs_msg.vel_FL_thigh = obs[25];   obs_msg.vel_FL_calf = obs[26];
+  obs_msg.vel_FR_hip = obs[27];   obs_msg.vel_FR_thigh = obs[28];   obs_msg.vel_FR_calf = obs[29];
+  obs_msg.vel_RL_hip = obs[30];   obs_msg.vel_RL_thigh = obs[31];   obs_msg.vel_RL_calf = obs[32];
+  obs_msg.vel_RR_hip = obs[33];   obs_msg.vel_RR_thigh = obs[34];   obs_msg.vel_RR_calf = obs[35];
+
+  obs_msg.act_FL_hip = obs[36];   obs_msg.act_FL_thigh = obs[37];   obs_msg.act_FL_calf = obs[38];
+  obs_msg.act_FR_hip = obs[39];   obs_msg.act_FR_thigh = obs[40];   obs_msg.act_FR_calf = obs[41];
+  obs_msg.act_RL_hip = obs[42];   obs_msg.act_RL_thigh = obs[43];   obs_msg.act_RL_calf = obs[44];
+  obs_msg.act_RR_hip = obs[45];   obs_msg.act_RR_thigh = obs[46];   obs_msg.act_RR_calf = obs[47];
+
+  pub_obs_.publish(obs_msg);
+}

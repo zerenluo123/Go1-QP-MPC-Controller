@@ -73,7 +73,7 @@ int main(int argc, char **argv) {
 
       auto t2 = std::chrono::high_resolution_clock::now();
       std::chrono::duration<double, std::milli> ms_double = t2 - t1;
-      std::cout << "thread 1 solution is updated in " << ms_double.count() << "ms" << std::endl;
+//      std::cout << "thread 1 solution is updated in " << ms_double.count() << "ms" << std::endl;
 
       if (!running) {
         std::cout << "Thread 1 loop is terminated because of errors." << std::endl;
@@ -97,7 +97,7 @@ int main(int argc, char **argv) {
 
       auto t4 = std::chrono::high_resolution_clock::now();
       std::chrono::duration<double, std::milli> ms_double = t4 - t3;
-      std::cout << "Thread 2 is updated in " << ms_double.count() << "ms" << std::endl;
+//      std::cout << "Thread 2 is updated in " << ms_double.count() << "ms" << std::endl;
 
       if (!send_cmd_running) {
         std::cout << "Thread 2 loop is terminated because of errors." << std::endl;

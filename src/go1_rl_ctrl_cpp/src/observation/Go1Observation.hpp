@@ -21,6 +21,8 @@
 #include <unitree_legged_msgs/MotorState.h>
 #include <unitree_legged_msgs/MotorCmd.h>
 #include <unitree_legged_msgs/LowCmd.h>
+#include <unitree_legged_msgs/Observation.h>
+
 
 #include "../Go1Params.hpp"
 #include "../Go1CtrlStates.hpp"
@@ -105,7 +107,7 @@ class Go1Observation{
     // assign observation vector
     obDouble_.segment(0, 3) = go1_ctrl_states_.root_rot_mat.transpose() * go1_ctrl_states_.root_lin_vel; // 1. base linear velocity(robot frame)
     obDouble_.segment(3, 3) = go1_ctrl_states_.imu_ang_vel; // 2. base angular velocity(robot frame, [roll, pitch, yaw])
-    obDouble_.segment(6, 3) = go1_ctrl_states_.root_rot_mat.transpose() * Eigen::Vector3d::UnitZ(); // 3. projected gravity(projected z unit vector)
+    obDouble_.segment(6, 3) = go1_ctrl_states_.root_rot_mat.transpose() * (-Eigen::Vector3d::UnitZ()); // 3. projected gravity(projected z unit vector)
     obDouble_.segment(9, 3) << joy_cmd_velx_, joy_cmd_vely_, joy_cmd_yaw_rate_; // 4. command([cmd_velx, cmd_vely, cmd_ang_vel_yaw])
     obDouble_.segment(12, 12) = go1_ctrl_states_.joint_pos - go1_ctrl_states_.default_joint_pos; // 5. (joint_pos - default_joint_pos)
     obDouble_.segment(24, 12) = go1_ctrl_states_.joint_vel; // 6. joint_vel

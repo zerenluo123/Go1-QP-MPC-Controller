@@ -48,8 +48,11 @@ class Go1RLController {
 
   bool send_cmd();
 
+  void send_obs(Eigen::VectorXf &obs);
 
- private:
+
+
+    private:
   ros::NodeHandle nh_;
   std::string pkgDir_;
 
@@ -58,6 +61,7 @@ class Go1RLController {
   // 6,  7,  8: RL_hip, RL_thigh, RL_calf
   // 9, 10, 11: RR_hip, RR_thigh, RR_calf
   ros::Publisher pub_joint_cmd_[12];
+  ros::Publisher pub_obs_;
 
   //! YAML parsing of parameter file
   YAML::Node yamlNode_;
