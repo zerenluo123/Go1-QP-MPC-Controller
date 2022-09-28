@@ -105,7 +105,7 @@ class Go1Observation{
 //    }
 
     // assign observation vector
-    obDouble_.segment(0, 3) = go1_ctrl_states_.root_rot_mat.transpose() * go1_ctrl_states_.root_lin_vel; // 1. base linear velocity(robot frame)
+    obDouble_.segment(0, 3) = go1_ctrl_states_.root_rot_mat_z.transpose() * go1_ctrl_states_.root_lin_vel; // 1. base linear velocity(robot frame)
     obDouble_.segment(3, 3) = go1_ctrl_states_.imu_ang_vel; // 2. base angular velocity(robot frame, [roll, pitch, yaw])
     obDouble_.segment(6, 3) = go1_ctrl_states_.root_rot_mat.transpose() * (-Eigen::Vector3d::UnitZ()); // 3. projected gravity(projected z unit vector)
     obDouble_.segment(9, 3) << joy_cmd_velx_, joy_cmd_vely_, joy_cmd_yaw_rate_; // 4. command([cmd_velx, cmd_vely, cmd_ang_vel_yaw])
@@ -276,6 +276,30 @@ class Go1Observation{
   void RR_foot_contact_callback(const geometry_msgs::WrenchStamped &force) {
     go1_ctrl_states_.foot_force[3] = force.wrench.force.z;
   }
+
+
+//  void estimation() {
+//
+//    ros::Time prev = ros::Time::now();
+//    ros::Time now = ros::Time::now();
+//    ros::Duration dt(0);
+//    while (destruct_ == false) {
+//
+//      now = ros::Time::now();
+//      dt = now - prev;
+//      prev = now;
+//      double dt_s = dt.toSec();
+//
+//      // update state estimation, include base position and base velocity(world frame)
+//      if (!go1_estimate_.is_inited()) {
+//        go1_estimate_.init_state(go1_ctrl_states_);
+//      } else {
+//        go1_estimate_.update_estimation(go1_ctrl_states_, dt_s);
+//      }
+//
+//    } // while
+//
+//  } // void estimation()
 
 
 

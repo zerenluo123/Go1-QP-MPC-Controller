@@ -176,7 +176,30 @@
                             <subscriber_queue_size>100</subscriber_queue_size>
                             <title>FL_calf</title>
                         </curve_2>
-                        <curve_3>
+                    </curves>
+                    <legend>
+                        <visible>true</visible>
+                    </legend>
+                    <plot_rate>30</plot_rate>
+                    <title>FL_act</title>
+                </column_0>
+                <column_1>
+                    <axes>
+                        <axes>
+                            <x_axis>
+                                <custom_title>Untitled Axis</custom_title>
+                                <title_type>0</title_type>
+                                <title_visible>true</title_visible>
+                            </x_axis>
+                            <y_axis>
+                                <custom_title>Untitled Axis</custom_title>
+                                <title_type>0</title_type>
+                                <title_visible>true</title_visible>
+                            </y_axis>
+                        </axes>
+                    </axes>
+                    <curves>
+                        <curve_0>
                             <axes>
                                 <x_axis>
                                     <field>clock</field>
@@ -226,8 +249,8 @@
                             </style>
                             <subscriber_queue_size>100</subscriber_queue_size>
                             <title>FR_hip</title>
-                        </curve_3>
-                        <curve_4>
+                        </curve_0>
+                        <curve_1>
                             <axes>
                                 <x_axis>
                                     <field>clock</field>
@@ -277,8 +300,8 @@
                             </style>
                             <subscriber_queue_size>100</subscriber_queue_size>
                             <title>FR_thigh</title>
-                        </curve_4>
-                        <curve_5>
+                        </curve_1>
+                        <curve_2>
                             <axes>
                                 <x_axis>
                                     <field>clock</field>
@@ -328,14 +351,14 @@
                             </style>
                             <subscriber_queue_size>100</subscriber_queue_size>
                             <title>FR_calf</title>
-                        </curve_5>
+                        </curve_2>
                     </curves>
                     <legend>
                         <visible>true</visible>
                     </legend>
                     <plot_rate>30</plot_rate>
-                    <title>F</title>
-                </column_0>
+                    <title>FR_act</title>
+                </column_1>
             </row_0>
             <row_1>
                 <column_0>
@@ -507,7 +530,30 @@
                             <subscriber_queue_size>100</subscriber_queue_size>
                             <title>RL_calf</title>
                         </curve_2>
-                        <curve_3>
+                    </curves>
+                    <legend>
+                        <visible>true</visible>
+                    </legend>
+                    <plot_rate>30</plot_rate>
+                    <title>RL_act</title>
+                </column_0>
+                <column_1>
+                    <axes>
+                        <axes>
+                            <x_axis>
+                                <custom_title>Untitled Axis</custom_title>
+                                <title_type>0</title_type>
+                                <title_visible>true</title_visible>
+                            </x_axis>
+                            <y_axis>
+                                <custom_title>Untitled Axis</custom_title>
+                                <title_type>0</title_type>
+                                <title_visible>true</title_visible>
+                            </y_axis>
+                        </axes>
+                    </axes>
+                    <curves>
+                        <curve_0>
                             <axes>
                                 <x_axis>
                                     <field>clock</field>
@@ -557,8 +603,8 @@
                             </style>
                             <subscriber_queue_size>100</subscriber_queue_size>
                             <title>RR_hip</title>
-                        </curve_3>
-                        <curve_4>
+                        </curve_0>
+                        <curve_1>
                             <axes>
                                 <x_axis>
                                     <field>clock</field>
@@ -608,8 +654,8 @@
                             </style>
                             <subscriber_queue_size>100</subscriber_queue_size>
                             <title>RR_thigh</title>
-                        </curve_4>
-                        <curve_5>
+                        </curve_1>
+                        <curve_2>
                             <axes>
                                 <x_axis>
                                     <field>clock</field>
@@ -659,14 +705,14 @@
                             </style>
                             <subscriber_queue_size>100</subscriber_queue_size>
                             <title>RR_calf</title>
-                        </curve_5>
+                        </curve_2>
                     </curves>
                     <legend>
                         <visible>true</visible>
                     </legend>
                     <plot_rate>30</plot_rate>
-                    <title>R</title>
-                </column_0>
+                    <title>RR_act</title>
+                </column_1>
             </row_1>
         </plots>
         <track_points>false</track_points>

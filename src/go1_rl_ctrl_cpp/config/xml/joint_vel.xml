@@ -39,7 +39,7 @@
                                     <type>rosgraph_msgs/Clock</type>
                                 </x_axis>
                                 <y_axis>
-                                    <field>pos_FL_hip</field>
+                                    <field>vel_FL_hip</field>
                                     <field_type>0</field_type>
                                     <scale>
                                         <absolute_maximum>1000</absolute_maximum>
@@ -90,7 +90,7 @@
                                     <type>rosgraph_msgs/Clock</type>
                                 </x_axis>
                                 <y_axis>
-                                    <field>pos_FL_thigh</field>
+                                    <field>vel_FL_thigh</field>
                                     <field_type>0</field_type>
                                     <scale>
                                         <absolute_maximum>1000</absolute_maximum>
@@ -141,7 +141,7 @@
                                     <type>rosgraph_msgs/Clock</type>
                                 </x_axis>
                                 <y_axis>
-                                    <field>pos_FL_calf</field>
+                                    <field>vel_FL_calf</field>
                                     <field_type>0</field_type>
                                     <scale>
                                         <absolute_maximum>1000</absolute_maximum>
@@ -181,7 +181,7 @@
                         <visible>true</visible>
                     </legend>
                     <plot_rate>30</plot_rate>
-                    <title>FL_pos</title>
+                    <title>FL_vel</title>
                 </column_0>
                 <column_1>
                     <axes>
@@ -215,7 +215,7 @@
                                     <type>rosgraph_msgs/Clock</type>
                                 </x_axis>
                                 <y_axis>
-                                    <field>pos_FR_hip</field>
+                                    <field>vel_FR_hip</field>
                                     <field_type>0</field_type>
                                     <scale>
                                         <absolute_maximum>1000</absolute_maximum>
@@ -266,7 +266,7 @@
                                     <type>rosgraph_msgs/Clock</type>
                                 </x_axis>
                                 <y_axis>
-                                    <field>pos_FR_thigh</field>
+                                    <field>vel_FR_thigh</field>
                                     <field_type>0</field_type>
                                     <scale>
                                         <absolute_maximum>1000</absolute_maximum>
@@ -317,7 +317,7 @@
                                     <type>rosgraph_msgs/Clock</type>
                                 </x_axis>
                                 <y_axis>
-                                    <field>pos_FR_calf</field>
+                                    <field>vel_FR_calf</field>
                                     <field_type>0</field_type>
                                     <scale>
                                         <absolute_maximum>1000</absolute_maximum>
@@ -357,7 +357,7 @@
                         <visible>true</visible>
                     </legend>
                     <plot_rate>30</plot_rate>
-                    <title>FR_pos</title>
+                    <title>FR_vel</title>
                 </column_1>
             </row_0>
             <row_1>
@@ -393,7 +393,7 @@
                                     <type>rosgraph_msgs/Clock</type>
                                 </x_axis>
                                 <y_axis>
-                                    <field>pos_RL_hip</field>
+                                    <field>vel_RL_hip</field>
                                     <field_type>0</field_type>
                                     <scale>
                                         <absolute_maximum>1000</absolute_maximum>
@@ -444,7 +444,7 @@
                                     <type>rosgraph_msgs/Clock</type>
                                 </x_axis>
                                 <y_axis>
-                                    <field>pos_RL_thigh</field>
+                                    <field>vel_RL_thigh</field>
                                     <field_type>0</field_type>
                                     <scale>
                                         <absolute_maximum>1000</absolute_maximum>
@@ -495,7 +495,7 @@
                                     <type>rosgraph_msgs/Clock</type>
                                 </x_axis>
                                 <y_axis>
-                                    <field>pos_RL_calf</field>
+                                    <field>vel_RL_calf</field>
                                     <field_type>0</field_type>
                                     <scale>
                                         <absolute_maximum>1000</absolute_maximum>
@@ -535,7 +535,7 @@
                         <visible>true</visible>
                     </legend>
                     <plot_rate>30</plot_rate>
-                    <title>RL_pos</title>
+                    <title>RL_vel</title>
                 </column_0>
                 <column_1>
                     <axes>
@@ -569,7 +569,7 @@
                                     <type>rosgraph_msgs/Clock</type>
                                 </x_axis>
                                 <y_axis>
-                                    <field>pos_RR_hip</field>
+                                    <field>vel_RR_hip</field>
                                     <field_type>0</field_type>
                                     <scale>
                                         <absolute_maximum>1000</absolute_maximum>
@@ -620,7 +620,7 @@
                                     <type>rosgraph_msgs/Clock</type>
                                 </x_axis>
                                 <y_axis>
-                                    <field>pos_RR_thigh</field>
+                                    <field>vel_RR_thigh</field>
                                     <field_type>0</field_type>
                                     <scale>
                                         <absolute_maximum>1000</absolute_maximum>
@@ -671,7 +671,7 @@
                                     <type>rosgraph_msgs/Clock</type>
                                 </x_axis>
                                 <y_axis>
-                                    <field>pos_RR_calf</field>
+                                    <field>vel_RR_calf</field>
                                     <field_type>0</field_type>
                                     <scale>
                                         <absolute_maximum>1000</absolute_maximum>
@@ -711,7 +711,7 @@
                         <visible>true</visible>
                     </legend>
                     <plot_rate>30</plot_rate>
-                    <title>RR_pos</title>
+                    <title>RR_vel</title>
                 </column_1>
             </row_1>
         </plots>
