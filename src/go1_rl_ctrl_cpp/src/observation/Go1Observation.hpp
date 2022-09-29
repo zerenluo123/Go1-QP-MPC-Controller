@@ -83,6 +83,11 @@ class Go1Observation{
 
     sub_joy_msg_ = nh.subscribe("/joy", 1000, &Go1Observation::joy_callback, this);
 
+    joy_cmd_ctrl_state_ = 0;
+    joy_cmd_ctrl_state_change_request_ = false;
+    prev_joy_cmd_ctrl_state_ = 0;
+    joy_cmd_exit_ = false;
+
     // don't know if filter is needed
     acc_x_ = MovingWindowFilter(5);
     acc_y_ = MovingWindowFilter(5);
@@ -121,13 +126,42 @@ class Go1Observation{
     // clip the observation
     obScaled_ = obScaled_.cwiseMin(clipObs_).cwiseMax(-clipObs_);
 
+    // update joy cmd
+    prev_joy_cmd_ctrl_state_ = joy_cmd_ctrl_state_;
+
+    if (joy_cmd_ctrl_state_change_request_) {
+      // toggle joy_cmd_ctrl_state
+      joy_cmd_ctrl_state_ = joy_cmd_ctrl_state_ + 1;
+      joy_cmd_ctrl_state_ = joy_cmd_ctrl_state_ % 2; //TODO: how to toggle more states?
+      joy_cmd_ctrl_state_change_request_ = false; //erase this change request;
+    }
+
+    // determine movement mode
+    if (joy_cmd_ctrl_state_ == 1) {
+      // walking mode, in this mode the robot should execute gait
+      go1_ctrl_states_.movement_mode = 1;
+    } else if (joy_cmd_ctrl_state_ == 0 && prev_joy_cmd_ctrl_state_ == 1) {
+      // leave walking mode
+      // lock current position, should just happen for one instance
+      go1_ctrl_states_.movement_mode = 0;
+    } else {
+      go1_ctrl_states_.movement_mode = 0;
+    }
+
   }
 
   Eigen::VectorXd getObservation() { return obScaled_; }
+  Go1CtrlStates getCtrlState() { return go1_ctrl_states_; }
+
 
   void joy_callback(const sensor_msgs::Joy::ConstPtr &joy_msg) { // This function applies for both gazebo and hardware
 //  // left updown: change body height, not need now
 //  joy_cmd_velz = joy_msg->axes[1] * JOY_CMD_BODY_HEIGHT_VEL;
+
+    //A
+    if (joy_msg->buttons[0] == 1) {
+      joy_cmd_ctrl_state_change_request_ = true;
+    }
 
     // right updown
     joy_cmd_velx_ = joy_msg->axes[4] * JOY_CMD_VELX_MAX;
@@ -349,6 +383,7 @@ class Go1Observation{
   //  0 is standing, 1 is walking
   int joy_cmd_ctrl_state_ = 0;
   int prev_joy_cmd_ctrl_state_ = 0;
+  bool joy_cmd_ctrl_state_change_request_ = false;
   bool joy_cmd_exit_ = false;
 
 };

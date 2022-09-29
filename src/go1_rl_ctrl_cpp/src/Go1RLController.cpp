@@ -9,6 +9,7 @@ Go1RLController::Go1RLController(ros::NodeHandle &nh) {
   nh_ = nh;
   ros::param::get("package_dir", pkgDir_);
   ros::param::get("weights", ctrlWeights_);
+  ros::param::get("stand_weights", standCtrlWeights_);
 
   // ROS publisher
   pub_joint_cmd_[0] = nh.advertise<unitree_legged_msgs::MotorCmd>("/go1_gazebo/FL_hip_controller/command", 1);
@@ -49,7 +50,11 @@ bool Go1RLController::create(double dt) {
 }
 
 void Go1RLController::loadNNparams() {
+  ROS_INFO_STREAM("\033[1;33m[Go1RLController] Weights: " << standCtrlWeights_ << "\033[0m");
   ROS_INFO_STREAM("\033[1;33m[Go1RLController] Weights: " << ctrlWeights_ << "\033[0m");
+
+  standPolicy_.load(pkgDir_ + "/resource/" + standCtrlWeights_);
+  ROS_INFO_STREAM("[Go1RLController::loadNNparams] load stand policy weights ");
 
   policy_.load(pkgDir_ + "/resource/" + ctrlWeights_);
   ROS_INFO_STREAM("[Go1RLController::loadNNparams] load policy weights ");
@@ -64,20 +69,27 @@ bool Go1RLController::advance(double dt) {
   // put in action
   Eigen::VectorXf obs(proprioObs.size() + 12); // full observation; dim=48
   obs << proprioObs.cast<float>(), prevActionDouble_.cast<float>();
-  policy_.run(obs, action_);
+
+  // get movement mode, 0: stand, 1: walking
+  go1_ctrl_states_ = go1Obs_->getCtrlState();
+
+  if (go1_ctrl_states_.movement_mode == 0) {  // stand
+    standPolicy_.run(obs, action_);
+  } else { // walk
+    policy_.run(obs, action_);
+  }
+
+//  policy_.run(obs, action_);
   actionDouble_ = action_.cast<double>();
 
   // add clip to the action(should be of little use)
   actionDouble_ = actionDouble_.cwiseMin(clipAction_).cwiseMax(-clipAction_);
-
   prevActionDouble_ = actionDouble_;
-//  std::cout << actionDouble_ << std::endl;
 
   // compute joint torque (PD controller)
   Eigen::VectorXd actionScaled = actionDouble_ * actionScale_;
   // pos: proprioObs.segment(12, 12); vel: proprioObs.segment(24, 12)
   torques_ = stiffness_ * (actionScaled - proprioObs.segment(12, 12)) - damping_ * proprioObs.segment(24, 12);
-
 
   // *********** debug **********
   send_obs(obs);

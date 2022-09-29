@@ -20,6 +20,7 @@
 // control parameters
 #include "Go1Params.hpp"
 #include "observation/Go1Observation.hpp"
+#include "Go1CtrlStates.hpp"
 
 
 class Go1RLController {
@@ -73,7 +74,9 @@ class Go1RLController {
   Eigen::VectorXd torques_;
 
   //! controller/policy
+  TorchEigen standPolicy_;
   TorchEigen policy_;
+  std::string standCtrlWeights_;
   std::string ctrlWeights_;
 
   //! Parameter loading
@@ -89,6 +92,10 @@ class Go1RLController {
   double actionScale_ = 0.25;
   double stiffness_ = 20.;
   double damping_ = 0.5;
+
+  // ! go1 control state
+  Go1CtrlStates go1_ctrl_states_;
+
 
 
 };
