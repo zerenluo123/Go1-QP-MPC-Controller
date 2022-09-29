@@ -68,6 +68,7 @@ set_property(TARGET torch_eigen PROPERTY CXX_STANDARD 14)
 
 
 # lib of different types of robots
+# gazebo
 add_library(gazebo_go1_lib
         src/Go1RLController.hpp
         src/Go1RLController.cpp
@@ -77,8 +78,18 @@ target_link_libraries(gazebo_go1_lib
         torch_eigen
         libyaml-cpp.so)
 
+# hardware
+add_library(hardware_go1_lib
+        src/Go1RLHardwareController.hpp
+        src/Go1RLHardwareController.cpp
+        )
+target_link_libraries(hardware_go1_lib
+        go1_lib
+        torch_eigen
+        libyaml-cpp.so)
 
 # Declare a cpp executable for gazebo robot
+# gazebo
 add_executable(gazebo_go1_ctrl src/MainGazebo.cpp)
 target_link_libraries(gazebo_go1_ctrl
         ${catkin_LIBRARIES}
