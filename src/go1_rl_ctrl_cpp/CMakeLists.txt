@@ -47,7 +47,8 @@ add_library(go1_lib
         src/utils/Utils.cpp
         src/EKF/Go1BasicEKF.hpp
         src/EKF/Go1BasicEKF.cpp
-        src/observation/Go1Observation.hpp)
+        src/observation/Go1Observation.hpp
+        src/observation/Go1HardwareObservation.hpp)
 target_link_libraries(go1_lib ${catkin_LIBRARIES})
 
 #target_link_libraries(${PACKAGE_NAME} /usr/lib/x86_64-linux-gnu/libtinyxml2.so)

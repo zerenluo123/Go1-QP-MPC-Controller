@@ -32,7 +32,7 @@
 
 // control parameters
 #include "Go1Params.hpp"
-#include "observation/Go1Observation.hpp"
+#include "observation/Go1HardwareObservation.hpp"
 #include "Go1CtrlStates.hpp"
 
 // go1 hardware
@@ -53,12 +53,7 @@ class Go1RLHardwareController {
 
   bool create(double dt);
 
-  bool initialize(double dt);
-
   bool advance(double dt);
-
-  // callback functions
-  void joy_callback(const sensor_msgs::Joy::ConstPtr &joy_msg);
 
   bool send_cmd();
 
@@ -67,13 +62,6 @@ class Go1RLHardwareController {
  private:
   ros::NodeHandle nh_;
   std::string pkgDir_;
-
-  ros::Publisher pub_joint_cmd;
-  ros::Publisher pub_joint_angle;
-  ros::Publisher pub_imu;
-  sensor_msgs::JointState joint_foot_msg;
-  sensor_msgs::Imu imu_msg;
-  ros::Subscriber sub_joy_msg;
 
   // debug estimated position
   ros::Publisher pub_estimated_pose;
@@ -96,18 +84,6 @@ class Go1RLHardwareController {
   Eigen::Matrix<int, NUM_LEG, 1> swap_foot_indices;
 
 
-  // joystic command
-  double joy_cmd_velx = 0.0;
-  double joy_cmd_vely = 0.0;
-  double joy_cmd_velz = 0.0;
-  double joy_cmd_yaw_rate = 0.0;
-
-  //  0 is standing, 1 is walking
-  int joy_cmd_ctrl_state = 0;
-  bool joy_cmd_ctrl_state_change_request = false;
-  int prev_joy_cmd_ctrl_state = 0;
-  bool joy_cmd_exit = false;
-
   //! observations & actions
   std::unordered_map<std::string, Eigen::VectorXd> obsMap_;
   Eigen::VectorXd prevActionDouble_, actionDouble_; // double
@@ -127,7 +103,7 @@ class Go1RLHardwareController {
   void loadNNparams();
 
   //! observation
-  std::unique_ptr<Go1Observation> go1Obs_;
+  std::unique_ptr<Go1HardwareObservation> go1Obs_;
 
   double clipAction_ = 100.;
   double actionScale_ = 0.25;

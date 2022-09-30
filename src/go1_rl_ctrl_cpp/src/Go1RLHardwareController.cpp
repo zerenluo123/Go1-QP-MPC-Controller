@@ -12,24 +12,8 @@ Go1RLHardwareController::Go1RLHardwareController(ros::NodeHandle &nh)
   ros::param::get("weights", ctrlWeights_);
   ros::param::get("stand_weights", standCtrlWeights_);
 
-  // ROS publisher
-  pub_joint_cmd = nh_.advertise<sensor_msgs::JointState>("/hardware_go1/joint_torque_cmd", 100);
-
-  // debug joint angle and foot force
-  pub_joint_angle = nh_.advertise<sensor_msgs::JointState>("/hardware_go1/joint_foot", 100);
-
-  // imu data
-  pub_imu = nh_.advertise<sensor_msgs::Imu>("/hardware_go1/imu", 100);
-
-  sub_joy_msg = nh_.subscribe("/joy", 1000, &Go1RLHardwareController::joy_callback, this);
-
   udp.InitCmdData(cmd);
   udp_init_send();
-
-  joy_cmd_ctrl_state = 0;
-  joy_cmd_ctrl_state_change_request = false;
-  prev_joy_cmd_ctrl_state = 0;
-  joy_cmd_exit = false;
 
   go1_ctrl_states.reset();
   go1_ctrl_states.resetFromROSParam(nh_);
@@ -38,8 +22,38 @@ Go1RLHardwareController::Go1RLHardwareController(ros::NodeHandle &nh)
   swap_joint_indices << 3, 4, 5, 0, 1, 2, 9, 10, 11, 6, 7, 8;
   swap_foot_indices << 1, 0, 3, 2;
 
-  // start hardware reading thread after everything initialized
+  // action and torque init
+  actionDouble_.setZero(12);  prevActionDouble_.setZero(12);  action_.setZero(12);
+  torques_.setZero(12);
+  // observation
+  go1Obs_ = std::make_unique<Go1HardwareObservation>(nh);
+
+  // start hardware reading thread after everything initialized TODO: change this into hardware observation
   thread_ = std::thread(&Go1RLHardwareController::receive_low_state, this);
+
+}
+
+
+bool Go1RLHardwareController::create(double dt) {
+
+  // Load parameters
+  ROS_INFO_STREAM("[Go1RLHardwareController::create] creating");
+
+  //! load NN parameter
+  loadNNparams();
+
+  return true;
+}
+
+void Go1RLHardwareController::loadNNparams() {
+  ROS_INFO_STREAM("\033[1;33m[Go1RLHardwareController] Weights: " << standCtrlWeights_ << "\033[0m");
+  ROS_INFO_STREAM("\033[1;33m[Go1RLHardwareController] Weights: " << ctrlWeights_ << "\033[0m");
+
+  standPolicy_.load(pkgDir_ + "/resource/" + standCtrlWeights_);
+  ROS_INFO_STREAM("[Go1RLHardwareController::loadNNparams] load stand policy weights ");
+
+  policy_.load(pkgDir_ + "/resource/" + ctrlWeights_);
+  ROS_INFO_STREAM("[Go1RLHardwareController::loadNNparams] load policy weights ");
 
 }
 
@@ -74,28 +88,6 @@ bool Go1RLHardwareController::send_cmd() {
   return true;
 }
 
-void Go1RLHardwareController::joy_callback(const sensor_msgs::Joy::ConstPtr &joy_msg) {
-//  // left updown
-//  joy_cmd_velz = joy_msg->axes[1] * JOY_CMD_BODY_HEIGHT_VEL;
-
-  //A
-  if (joy_msg->buttons[0] == 1) {
-    joy_cmd_ctrl_state_change_request = true;
-  }
-
-  // right updown
-  joy_cmd_velx = joy_msg->axes[4] * JOY_CMD_VELX_MAX;
-  // right horiz
-  joy_cmd_vely = joy_msg->axes[3] * JOY_CMD_VELY_MAX;
-  // left horiz
-  joy_cmd_yaw_rate  = joy_msg->axes[0]*JOY_CMD_YAW_MAX;
-
-  // lb
-  if (joy_msg->buttons[4] == 1) {
-    std::cout << "You have pressed the exit button!!!!" << std::endl;
-    joy_cmd_exit = true;
-  }
-}
 
 void Go1RLHardwareController::udp_init_send() {
   cmd.levelFlag = UNITREE_LEGGED_SDK::LOWLEVEL;

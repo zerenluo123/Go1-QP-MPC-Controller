@@ -32,25 +32,11 @@ class Go1RLController {
 
   bool create(double dt);
 
-  bool initialize(double dt);
-
   bool advance(double dt);
-
-  bool reset(double dt);
-
-  bool preStop() { return true; };
-
-  bool stop() { return true; };
-
-  bool cleanup();
-
-  // callback functions
-  void joy_callback(const sensor_msgs::Joy::ConstPtr &joy_msg);
 
   bool send_cmd();
 
   void send_obs(Eigen::VectorXf &obs);
-
 
 
     private:
