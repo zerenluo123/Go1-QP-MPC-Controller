@@ -3,6 +3,15 @@
 //
 
 #include <Eigen/Core>
+#include <Eigen/Dense>
+#include <memory>
+#include <set>
+#include <chrono>
+#include <map>
+#include <mutex>
+#include <thread>
+#include <condition_variable>
+#include <fstream>
 
 // ROS
 #include <ros/ros.h>
@@ -18,12 +27,8 @@
 #include <geometry_msgs/WrenchStamped.h>
 #include <geometry_msgs/PointStamped.h>
 
-// unitree_legged_msgs for gazebo
-#include <unitree_legged_msgs/MotorState.h>
-#include <unitree_legged_msgs/MotorCmd.h>
-#include <unitree_legged_msgs/LowCmd.h>
-#include <unitree_legged_msgs/Observation.h>
-
+// go1 hardware
+#include "unitree_legged_sdk/unitree_legged_sdk.h"
 
 #include "../Go1Params.hpp"
 #include "../Go1CtrlStates.hpp"
@@ -35,7 +40,8 @@
 // TODO: compute the observation vector as the one in issac gym legged_robot.py
 class Go1HardwareObservation{
  public:
-  Go1HardwareObservation(ros::NodeHandle &nh) {
+  Go1HardwareObservation(ros::NodeHandle &nh):
+      udp(UNITREE_LEGGED_SDK::LOWLEVEL, 8090, "192.168.123.10", 8007) {
     obDim_ = 36;
     obDouble_.setZero(obDim_); obScaled_.setZero(obDim_);
 
@@ -57,7 +63,7 @@ class Go1HardwareObservation{
     scaleFactor_.setZero(obDim_);
     scaleFactor_ << linVelScale_, angVelScale_, gravityScale_, commandScale_, dofPosScale_, dofVelScale_;
 
-    // ROS publisher
+    // ROS publisher; joint cmd(not used in shuo's case)
     pub_joint_cmd_ = nh.advertise<sensor_msgs::JointState>("/hardware_go1/joint_torque_cmd", 100);
 
     // debug joint angle and foot force
@@ -66,6 +72,7 @@ class Go1HardwareObservation{
     // imu data
     pub_imu_ = nh.advertise<sensor_msgs::Imu>("/hardware_go1/imu", 100);
 
+    // joy command
     sub_joy_msg_ = nh.subscribe("/joy", 1000, &Go1HardwareObservation::joy_callback, this);
 
     joy_cmd_ctrl_state_ = 0;
@@ -73,25 +80,21 @@ class Go1HardwareObservation{
     prev_joy_cmd_ctrl_state_ = 0;
     joy_cmd_exit_ = false;
 
-    // don't know if filter is needed
-    acc_x_ = MovingWindowFilter(5);
-    acc_y_ = MovingWindowFilter(5);
-    acc_z_ = MovingWindowFilter(5);
-    gyro_x_ = MovingWindowFilter(5);
-    gyro_y_ = MovingWindowFilter(5);
-    gyro_z_ = MovingWindowFilter(5);
+    //init swap order, very important
+    swap_joint_indices << 3, 4, 5, 0, 1, 2, 9, 10, 11, 6, 7, 8;
 
+    // start hardware reading thread after everything initialized
+    thread_ = std::thread(&Go1HardwareObservation::receive_low_state, this);
+
+  }
+
+  ~Go1HardwareObservation() { // move from the controller to here
+    destruct = true;
+    thread_.join();
   }
 
   void updateObservation(double dt) {
     // TODO: get all observation from measurement and concat
-//    // update state estimation, include base position and base velocity(world frame)
-//    if (!go1_estimate_.is_inited()) {
-//      go1_estimate_.init_state(go1_ctrl_states_);
-//    } else {
-//      go1_estimate_.update_estimation(go1_ctrl_states_, dt);
-//    }
-
     // assign observation vector
     obDouble_.segment(0, 3) = go1_ctrl_states_.root_rot_mat_z.transpose() * go1_ctrl_states_.root_lin_vel; // 1. base linear velocity(robot frame)
     obDouble_.segment(3, 3) = go1_ctrl_states_.imu_ang_vel; // 2. base angular velocity(robot frame, [roll, pitch, yaw])
@@ -157,6 +160,70 @@ class Go1HardwareObservation{
     }
   }
 
+  void receive_low_state() {
+    ros::Time prev = ros::Time::now();
+    ros::Time now = ros::Time::now();
+    ros::Duration dt(0);
+    while (destruct == false) {
+//        std::cout << "OBSERVE THREAD: delta time is:"  << std::setprecision(10) << dt.toSec() << std::endl;
+//         std::cout << udp.targetIP << std::endl;
+      udp.Recv();
+//         std::cout << "receive" << std::endl;
+      udp.GetRecv(state);
+//         std::cout << state.motorState[0].q << std::endl;
+//         std::cout << state.imu.accelerometer[0] << std::endl;
+
+      // fill data to go1_ctrl_states_, notice the order in state is FR, FL, RR, RL
+      // fill data to go1_ctrl_states_, notice the order in go1_ctrl_states_ is FL, FR, RL, RR
+      go1_ctrl_states_.root_quat = Eigen::Quaterniond(state.imu.quaternion[0],
+                                                     state.imu.quaternion[1],
+                                                     state.imu.quaternion[2],
+                                                     state.imu.quaternion[3]);
+      go1_ctrl_states_.root_rot_mat = go1_ctrl_states_.root_quat.toRotationMatrix();
+      go1_ctrl_states_.root_euler = Utils::quat_to_euler(go1_ctrl_states_.root_quat);
+      double yaw_angle = go1_ctrl_states_.root_euler[2];
+
+      go1_ctrl_states_.root_rot_mat_z = Eigen::AngleAxisd(yaw_angle, Eigen::Vector3d::UnitZ());
+      // go1_ctrl_states_.root_pos     | do not fill
+      // go1_ctrl_states_.root_lin_vel | do not fill
+
+      go1_ctrl_states_.imu_acc = Eigen::Vector3d(state.imu.accelerometer[0], state.imu.accelerometer[1], state.imu.accelerometer[2]);
+      go1_ctrl_states_.imu_ang_vel = Eigen::Vector3d(state.imu.gyroscope[0], state.imu.gyroscope[1], state.imu.gyroscope[2]);
+      go1_ctrl_states_.root_ang_vel = go1_ctrl_states_.root_rot_mat * go1_ctrl_states_.imu_ang_vel;
+
+      // joint states
+      for (int i = 0; i < NUM_DOF; ++i) {
+        int swap_i = swap_joint_indices(i);
+        go1_ctrl_states_.joint_vel[i] = state.motorState[swap_i].dq;
+        // go1_ctrl_states_.joint_vel[i] = (state.motorState[swap_i].q - go1_ctrl_states_.joint_pos[i])/dt_s;
+        go1_ctrl_states_.joint_pos[i] = state.motorState[swap_i].q;
+      }
+
+      // publish joint angle
+      for (int i = 0; i < NUM_DOF; ++i) {
+        joint_foot_msg_.position[i] = go1_ctrl_states_.joint_pos[i];
+        joint_foot_msg_.velocity[i] = go1_ctrl_states_.joint_vel[i];
+      }
+      joint_foot_msg_.header.stamp = ros::Time::now();
+      pub_joint_angle_.publish(joint_foot_msg_);
+
+      imu_msg_.header.stamp = ros::Time::now();
+      imu_msg_.angular_velocity.x = state.imu.gyroscope[0];
+      imu_msg_.angular_velocity.y = state.imu.gyroscope[1];
+      imu_msg_.angular_velocity.z = state.imu.gyroscope[2];
+
+      imu_msg_.linear_acceleration.x = state.imu.accelerometer[0];
+      imu_msg_.linear_acceleration.y = state.imu.accelerometer[1];
+      imu_msg_.linear_acceleration.z = state.imu.accelerometer[2];
+      pub_imu_.publish(imu_msg_);
+
+      // sleep for interval_ms
+      double interval_ms = HARDWARE_FEEDBACK_FREQUENCY;
+      double interval_time = interval_ms / 1000.0;
+      ros::Duration(interval_time).sleep();
+    };
+  }
+
   Eigen::VectorXd getObservation() { return obScaled_; }
 
 
@@ -171,7 +238,6 @@ class Go1HardwareObservation{
   // 9, 10, 11: RR_hip, RR_thigh, RR_calf
 
   // 0, 1, 2, 3: FL, FR, RL, RR
-
   ros::Publisher pub_joint_cmd_;
   ros::Publisher pub_joint_angle_;
   ros::Publisher pub_imu_;
@@ -193,14 +259,6 @@ class Go1HardwareObservation{
   Go1CtrlStates go1_ctrl_states_;
   Go1BasicEKF go1_estimate_;
 
-  // filters
-  MovingWindowFilter acc_x_;
-  MovingWindowFilter acc_y_;
-  MovingWindowFilter acc_z_;
-  MovingWindowFilter gyro_x_;
-  MovingWindowFilter gyro_y_;
-  MovingWindowFilter gyro_z_;
-
   // joystick command
   double joy_cmd_velx_ = 0.0;
   double joy_cmd_vely_ = 0.0;
@@ -215,6 +273,15 @@ class Go1HardwareObservation{
   int prev_joy_cmd_ctrl_state_ = 0;
   bool joy_cmd_ctrl_state_change_request_ = false;
   bool joy_cmd_exit_ = false;
+
+  // go1 hardware reading thread
+  std::thread thread_;
+  bool destruct = false;
+  UNITREE_LEGGED_SDK::UDP udp;
+  UNITREE_LEGGED_SDK::LowState state = {0};
+  Eigen::Matrix<int, NUM_DOF, 1> swap_joint_indices;
+
+
 
 };
 

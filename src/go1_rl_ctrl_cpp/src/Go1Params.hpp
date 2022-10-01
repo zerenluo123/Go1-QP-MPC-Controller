@@ -9,7 +9,7 @@
 //#define CTRL_FREQUENCY 2.5  // ms
 #define ACTION_UPDATE_FREQUENCY 0.5 // ms
 #define DEPLOYMENT_FREQUENCY 0.5 // ms
-#define HARDWARE_FEEDBACK_FREQUENCY 1.0  // ms
+#define HARDWARE_FEEDBACK_FREQUENCY 0.5  // ms
 
 // constant define
 // joy stick command interprate

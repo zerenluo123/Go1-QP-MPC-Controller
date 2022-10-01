@@ -46,10 +46,10 @@ class Go1RLHardwareController {
  public:
   Go1RLHardwareController(ros::NodeHandle &nh);
 
-  ~Go1RLHardwareController() {
-    destruct = true;
-    thread_.join();
-  }
+//  ~Go1RLHardwareController() {
+//    destruct = true;
+//    thread_.join();
+//  }
 
   bool create(double dt);
 
@@ -71,9 +71,9 @@ class Go1RLHardwareController {
   UNITREE_LEGGED_SDK::Safety safe;
   UNITREE_LEGGED_SDK::LowState state = {0};
   UNITREE_LEGGED_SDK::LowCmd cmd = {0};
-  // go1 hardware reading thread
-  std::thread thread_;
-  bool destruct = false;
+//  // go1 hardware reading thread
+//  std::thread thread_;
+//  bool destruct = false;
 
   void udp_init_send();
 
@@ -83,6 +83,11 @@ class Go1RLHardwareController {
   Eigen::Matrix<int, NUM_DOF, 1> swap_joint_indices;
   Eigen::Matrix<int, NUM_LEG, 1> swap_foot_indices;
 
+  ros::Publisher pub_joint_cmd;
+  ros::Publisher pub_joint_angle;
+  ros::Publisher pub_imu;
+  sensor_msgs::JointState joint_foot_msg;
+  sensor_msgs::Imu imu_msg;
 
   //! observations & actions
   std::unordered_map<std::string, Eigen::VectorXd> obsMap_;

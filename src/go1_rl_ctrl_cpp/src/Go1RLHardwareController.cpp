@@ -15,9 +15,6 @@ Go1RLHardwareController::Go1RLHardwareController(ros::NodeHandle &nh)
   udp.InitCmdData(cmd);
   udp_init_send();
 
-  go1_ctrl_states.reset();
-  go1_ctrl_states.resetFromROSParam(nh_);
-
   //init swap order, very important
   swap_joint_indices << 3, 4, 5, 0, 1, 2, 9, 10, 11, 6, 7, 8;
   swap_foot_indices << 1, 0, 3, 2;
@@ -25,11 +22,8 @@ Go1RLHardwareController::Go1RLHardwareController(ros::NodeHandle &nh)
   // action and torque init
   actionDouble_.setZero(12);  prevActionDouble_.setZero(12);  action_.setZero(12);
   torques_.setZero(12);
-  // observation
+  // observation(the hardware reading thread is inited in here)
   go1Obs_ = std::make_unique<Go1HardwareObservation>(nh);
-
-  // start hardware reading thread after everything initialized TODO: change this into hardware observation
-  thread_ = std::thread(&Go1RLHardwareController::receive_low_state, this);
 
 }
 
@@ -57,6 +51,45 @@ void Go1RLHardwareController::loadNNparams() {
 
 }
 
+bool Go1RLHardwareController::advance(double dt) {
+  // updata obs except for actions.
+  // different from the gazebo, the hardware receive state measurement in controller, need to pass the control state to update observation
+  go1Obs_->updateObservation(dt);
+  Eigen::VectorXd proprioObs = go1Obs_->getObservation(); // dim=36
+
+  // put in action
+  Eigen::VectorXf obs(proprioObs.size() + 12); // full observation; dim=48
+  obs << proprioObs.cast<float>(), prevActionDouble_.cast<float>();
+
+  // controller and the observation must use the same set of control states.
+  go1_ctrl_states = go1Obs_->getCtrlState();
+
+  // get movement mode, 0: stand, 1: walking
+  if (go1_ctrl_states.movement_mode == 0) {  // stand
+    standPolicy_.run(obs, action_);
+  } else { // walk
+    policy_.run(obs, action_);
+  }
+
+//  policy_.run(obs, action_);
+  actionDouble_ = action_.cast<double>();
+
+  // add clip to the action(should be of little use)
+  actionDouble_ = actionDouble_.cwiseMin(clipAction_).cwiseMax(-clipAction_);
+  prevActionDouble_ = actionDouble_;
+
+  // compute joint torque (PD controller)
+  Eigen::VectorXd actionScaled = actionDouble_ * actionScale_;
+  // pos: proprioObs.segment(12, 12); vel: proprioObs.segment(24, 12)
+  torques_ = stiffness_ * (actionScaled - proprioObs.segment(12, 12)) - damping_ * proprioObs.segment(24, 12);
+
+//  // *********** debug **********
+//  send_obs(obs);
+
+  return true;
+
+}
+
 
 bool Go1RLHardwareController::send_cmd() {
   // send control cmd to robot via unitree hardware interface
@@ -70,10 +103,9 @@ bool Go1RLHardwareController::send_cmd() {
     cmd.motorCmd[i].dq = UNITREE_LEGGED_SDK::VelStopF; // shut down velocity control
     cmd.motorCmd[i].Kd = 0;
     int swap_i = swap_joint_indices(i);
-    cmd.motorCmd[i].tau = go1_ctrl_states.joint_torques(swap_i);
+    cmd.motorCmd[i].tau = go1_ctrl_states.joint_torques(swap_i); // TODO: use torque calculated in advance function
 
     std::cout << cmd.motorCmd[i].tau << std::endl;
-
 
   }
 
