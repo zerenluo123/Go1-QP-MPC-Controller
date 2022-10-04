@@ -15,6 +15,8 @@ Will update for full installation procedure later. For now, please use google do
 
 https://docs.google.com/document/d/1oeaLzuxC3kVKrw5ra6BAsyoRr79fPUHETEeBppi0BQo/edit
 
+After the installation setup is ready
+
 ## Controller Learning
 Train in issac gym, in which we can achieve a massive parallel reinforcement learning pipeline. Details will be updated later.
 
