@@ -40,10 +40,7 @@ After the robot properly stands up, it is ready to be controlled.
 
 ### Start the controller
 
-If you have completed the instructions before, there should be a runnable docker container called `a1_cpp_ctrl_docker` in your computer. 
-Run the container, build and config the A1 controller
-
-In the docker container, continue to run the controller
+Continue to run the controller
 ```shell
 roslaunch roslaunch go1_rl_ctrl_cpp go1_ctrl.launch 
 ```
