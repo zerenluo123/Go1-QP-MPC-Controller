@@ -121,6 +121,9 @@ bool Go1RLController::send_cmd() {
   return true;
 }
 
+// ***************************************************************
+// ************************** Debugging **************************
+// ***************************************************************
 void Go1RLController::send_obs(Eigen::VectorXf &obs) {
   // publish the observation
   unitree_legged_msgs::Observation obs_msg;
