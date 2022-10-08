@@ -140,7 +140,7 @@ public:
     void resetFromROSParam(ros::NodeHandle &_nh) {
         _nh.param("stance_leg_control_type", stance_leg_control_type, 1);
         _nh.param("use_terrain_adapt", use_terrain_adapt, 1);
-        
+
 
         _nh.param("go1_robot_mass", robot_mass, 13.0);
 

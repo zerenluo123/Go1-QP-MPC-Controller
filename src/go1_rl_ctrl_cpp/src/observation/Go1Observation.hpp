@@ -22,6 +22,7 @@
 #include <unitree_legged_msgs/MotorCmd.h>
 #include <unitree_legged_msgs/LowCmd.h>
 #include <unitree_legged_msgs/Observation.h>
+#include <unitree_legged_msgs/FootPos.h>
 
 
 #include "../Go1Params.hpp"
@@ -29,6 +30,7 @@
 #include "../utils/Utils.hpp"
 #include "../utils/filter.hpp"
 #include "../EKF/Go1BasicEKF.hpp"
+#include "../legKinematics/Go1Kinematics.hpp"
 
 
 // TODO: compute the observation vector as the one in issac gym legged_robot.py
@@ -96,8 +98,39 @@ class Go1Observation{
     gyro_y_ = MovingWindowFilter(5);
     gyro_z_ = MovingWindowFilter(5);
 
-//    // init default joint pos
-//    go1_ctrl_states_.joint_pos = go1_ctrl_states_.default_joint_pos;
+    // leg order: 0-FL  1-FR  2-RL  3-RR
+    leg_offset_x[0] = 0.1881;
+    leg_offset_x[1] = 0.1881;
+    leg_offset_x[2] = -0.1881;
+    leg_offset_x[3] = -0.1881;
+    leg_offset_y[0] = 0.04675;
+    leg_offset_y[1] = -0.04675;
+    leg_offset_y[2] = 0.04675;
+    leg_offset_y[3] = -0.04675;
+    motor_offset[0] = 0.08;
+    motor_offset[1] = -0.08;
+    motor_offset[2] = 0.08;
+    motor_offset[3] = -0.08;
+    upper_leg_length[0] = upper_leg_length[1] = upper_leg_length[2] = upper_leg_length[3] = 0.213;
+    lower_leg_length[0] = lower_leg_length[1] = lower_leg_length[2] = lower_leg_length[3] = 0.213;
+
+    for (int i = 0; i < NUM_LEG; i++) {
+      Eigen::VectorXd rho_fix(5);
+      rho_fix << leg_offset_x[i], leg_offset_y[i], motor_offset[i], upper_leg_length[i], lower_leg_length[i];
+      Eigen::VectorXd rho_opt(3);
+      rho_opt << 0.0, 0.0, 0.0;
+      rho_fix_list.push_back(rho_fix);
+      rho_opt_list.push_back(rho_opt);
+    }
+
+    // start hardware reading thread after everything initialized
+    thread_ = std::thread(&Go1Observation::estimation, this);
+
+  }
+
+  ~Go1Observation() {
+    destruct_ = true;
+    thread_.join();
   }
 
   void updateObservation(double dt) {
@@ -190,17 +223,15 @@ class Go1Observation{
     // go1_ctrl_states_.root_pos << odom->pose.pose.position.x,
     //         odom->pose.pose.position.y,
     //         odom->pose.pose.position.z;
-     // make sure root_lin_vel is in world frame
-     go1_ctrl_states_.root_lin_vel << odom->twist.twist.linear.x,
-             odom->twist.twist.linear.y,
-             odom->twist.twist.linear.z;
+//     // make sure root_lin_vel is in world frame
+//     go1_ctrl_states_.root_lin_vel << odom->twist.twist.linear.x,
+//             odom->twist.twist.linear.y,
+//             odom->twist.twist.linear.z;
 
     // make sure root_ang_vel is in world frame
     // go1_ctrl_states_.root_ang_vel << odom->twist.twist.angular.x,
     //         odom->twist.twist.angular.y,
     //         odom->twist.twist.angular.z;
-
-
 
     // calculate several useful variables
     // euler should be roll pitch yaw
@@ -209,6 +240,20 @@ class Go1Observation{
     double yaw_angle = go1_ctrl_states_.root_euler[2];
 
     go1_ctrl_states_.root_rot_mat_z = Eigen::AngleAxisd(yaw_angle, Eigen::Vector3d::UnitZ());
+
+    // FL, FR, RL, RR
+    for (int i = 0; i < NUM_LEG; ++i) {
+      go1_ctrl_states_.foot_pos_rel.block<3, 1>(0, i) = go1_kin_.fk(
+          go1_ctrl_states_.joint_pos.segment<3>(3 * i),
+          rho_opt_list[i], rho_fix_list[i]);
+      go1_ctrl_states_.j_foot.block<3, 3>(3 * i, 3 * i) = go1_kin_.jac(
+          go1_ctrl_states_.joint_pos.segment<3>(3 * i),
+          rho_opt_list[i], rho_fix_list[i]);
+      Eigen::Matrix3d tmp_mtx = go1_ctrl_states_.j_foot.block<3, 3>(3 * i, 3 * i);
+      Eigen::Vector3d tmp_vec = go1_ctrl_states_.joint_vel.segment<3>(3 * i);
+      go1_ctrl_states_.foot_vel_rel.block<3, 1>(0, i) = tmp_mtx * tmp_vec;
+
+    }
 
   }
 
@@ -312,28 +357,39 @@ class Go1Observation{
   }
 
 
-//  void estimation() {
-//
-//    ros::Time prev = ros::Time::now();
-//    ros::Time now = ros::Time::now();
-//    ros::Duration dt(0);
-//    while (destruct_ == false) {
-//
-//      now = ros::Time::now();
-//      dt = now - prev;
-//      prev = now;
-//      double dt_s = dt.toSec();
-//
-//      // update state estimation, include base position and base velocity(world frame)
-//      if (!go1_estimate_.is_inited()) {
-//        go1_estimate_.init_state(go1_ctrl_states_);
-//      } else {
-//        go1_estimate_.update_estimation(go1_ctrl_states_, dt_s);
-//      }
-//
-//    } // while
-//
-//  } // void estimation()
+  void estimation() {
+
+    ros::Time prev = ros::Time::now();
+    ros::Time now = ros::Time::now();
+    ros::Duration dt(0);
+    while (destruct_ == false) {
+
+      now = ros::Time::now();
+      dt = now - prev;
+      prev = now;
+      double dt_s = dt.toSec();
+
+      // update state estimation, include base position and base velocity(world frame)
+      auto t1 = ros::Time::now();
+      if (!go1_estimate_.is_inited()) {
+        go1_estimate_.init_state(go1_ctrl_states_);
+      } else {
+        go1_estimate_.update_estimation(go1_ctrl_states_, dt_s);
+      }
+      auto t2 = ros::Time::now();
+      ros::Duration run_dt = t2 - t1;
+
+
+      double interval_ms = HARDWARE_FEEDBACK_FREQUENCY;
+      // sleep for interval_ms
+      double interval_time = interval_ms / 1000.0;
+      if (interval_time > run_dt.toSec()) {
+        ros::Duration(interval_time - run_dt.toSec()).sleep();
+      }
+
+    } // while
+
+  } // void estimation()
 
 
 
@@ -360,6 +416,7 @@ class Go1Observation{
   Eigen::VectorXd scaleFactor_;
   double clipObs_ = 100.;
 
+  Go1Kinematics go1_kin_;
   Go1CtrlStates go1_ctrl_states_;
   Go1BasicEKF go1_estimate_;
 
@@ -385,5 +442,18 @@ class Go1Observation{
   int prev_joy_cmd_ctrl_state_ = 0;
   bool joy_cmd_ctrl_state_change_request_ = false;
   bool joy_cmd_exit_ = false;
+
+  // for each leg, there is an offset between the body frame and the hip motor (fx, fy)
+  double leg_offset_x[4] = {};
+  double leg_offset_y[4] = {};
+  // for each leg, there is an offset between the body frame and the hip motor (fx, fy)
+  double motor_offset[4] = {};
+  double upper_leg_length[4] = {};
+  double lower_leg_length[4] = {};
+  std::vector<Eigen::VectorXd> rho_fix_list;
+  std::vector<Eigen::VectorXd> rho_opt_list;
+
+  std::thread thread_;
+  bool destruct_ = false;
 
 };

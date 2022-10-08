@@ -36,6 +36,9 @@ Go1RLController::Go1RLController(ros::NodeHandle &nh) {
   // publish observation
   pub_obs_ = nh.advertise<unitree_legged_msgs::Observation>("/gazebo_go1/observation", 1);
 
+  // debug foot pos rel
+  pub_foot_pos_rel_ = nh.advertise<unitree_legged_msgs::FootPos>("/gazebo_go1/foot_pos_rel", 1);
+
 }
 
 bool Go1RLController::create(double dt) {
@@ -91,8 +94,9 @@ bool Go1RLController::advance(double dt) {
   // pos: proprioObs.segment(12, 12); vel: proprioObs.segment(24, 12)
   torques_ = stiffness_ * (actionScaled - proprioObs.segment(12, 12)) - damping_ * proprioObs.segment(24, 12);
 
-  // *********** debug **********
+//  // *********** debug **********
   send_obs(obs);
+//  send_foot_pos(go1_ctrl_states_);
 
   return true;
 
@@ -153,4 +157,30 @@ void Go1RLController::send_obs(Eigen::VectorXf &obs) {
   obs_msg.act_RR_hip = obs[45];   obs_msg.act_RR_thigh = obs[46];   obs_msg.act_RR_calf = obs[47];
 
   pub_obs_.publish(obs_msg);
+}
+
+
+void Go1RLController::send_foot_pos(Go1CtrlStates &go1_ctrl_states) {
+  unitree_legged_msgs::FootPos foot_pos_msg;
+
+  Eigen::Matrix<float, 3, NUM_LEG> foot_pos_rel_float = go1_ctrl_states.foot_pos_rel.cast<float>();
+
+  foot_pos_msg.FL_x = foot_pos_rel_float(0, 0);
+  foot_pos_msg.FL_y = foot_pos_rel_float(1, 0);
+  foot_pos_msg.FL_z = foot_pos_rel_float(2, 0);
+
+  foot_pos_msg.FR_x = foot_pos_rel_float(0, 1);
+  foot_pos_msg.FR_y = foot_pos_rel_float(1, 1);
+  foot_pos_msg.FR_z = foot_pos_rel_float(2, 1);
+
+  foot_pos_msg.RL_x = foot_pos_rel_float(0, 2);
+  foot_pos_msg.RL_y = foot_pos_rel_float(1, 2);
+  foot_pos_msg.RL_z = foot_pos_rel_float(2, 2);
+
+  foot_pos_msg.RR_x = foot_pos_rel_float(0, 3);
+  foot_pos_msg.RR_y = foot_pos_rel_float(1, 3);
+  foot_pos_msg.RR_z = foot_pos_rel_float(2, 3);
+
+  pub_foot_pos_rel_.publish(foot_pos_msg);
+
 }

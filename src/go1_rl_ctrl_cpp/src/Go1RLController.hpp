@@ -38,6 +38,8 @@ class Go1RLController {
 
   void send_obs(Eigen::VectorXf &obs);
 
+  void send_foot_pos(Go1CtrlStates &go1_ctrl_states);
+
 
     private:
   ros::NodeHandle nh_;
@@ -49,6 +51,7 @@ class Go1RLController {
   // 9, 10, 11: RR_hip, RR_thigh, RR_calf
   ros::Publisher pub_joint_cmd_[12];
   ros::Publisher pub_obs_;
+  ros::Publisher pub_foot_pos_rel_;
 
   //! YAML parsing of parameter file
   YAML::Node yamlNode_;

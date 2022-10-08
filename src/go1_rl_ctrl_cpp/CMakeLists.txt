@@ -41,6 +41,8 @@ set(EXTRA_LIBS -pthread libunitree_legged_sdk.so)
 # Declare cpp libraries
 # common robot controller every type of robots need
 add_library(go1_lib
+        src/legKinematics/Go1Kinematics.hpp
+        src/legKinematics/Go1Kinematics.cpp
         src/Go1Params.hpp
         src/Go1CtrlStates.hpp
         src/utils/Utils.hpp
