@@ -33,11 +33,10 @@ Go1RLController::Go1RLController(ros::NodeHandle &nh) {
   // observation
   go1Obs_ = std::make_unique<Go1Observation>(nh);
 
-  // publish observation
+  // debug: publish observation, foot pos rel, foot force
   pub_obs_ = nh.advertise<unitree_legged_msgs::Observation>("/gazebo_go1/observation", 1);
-
-  // debug foot pos rel
   pub_foot_pos_rel_ = nh.advertise<unitree_legged_msgs::FootPos>("/gazebo_go1/foot_pos_rel", 1);
+  pub_foot_force_ = nh.advertise<unitree_legged_msgs::FootForce>("/gazebo_go1/foot_force", 1);
 
 }
 
@@ -95,8 +94,9 @@ bool Go1RLController::advance(double dt) {
   torques_ = stiffness_ * (actionScaled - proprioObs.segment(12, 12)) - damping_ * proprioObs.segment(24, 12);
 
 //  // *********** debug **********
-  send_obs(obs);
+//  send_obs(obs);
 //  send_foot_pos(go1_ctrl_states_);
+//  send_foot_force(go1_ctrl_states_);
 
   return true;
 
@@ -182,5 +182,19 @@ void Go1RLController::send_foot_pos(Go1CtrlStates &go1_ctrl_states) {
   foot_pos_msg.RR_z = foot_pos_rel_float(2, 3);
 
   pub_foot_pos_rel_.publish(foot_pos_msg);
+
+}
+
+void Go1RLController::send_foot_force(Go1CtrlStates &go1_ctrl_states) {
+  unitree_legged_msgs::FootForce foot_force_msg;
+
+  Eigen::Vector4f foot_force_float = go1_ctrl_states.foot_force.cast<float>();
+
+  foot_force_msg.FL = foot_force_float[0];
+  foot_force_msg.FR = foot_force_float[1];
+  foot_force_msg.RL = foot_force_float[2];
+  foot_force_msg.RR = foot_force_float[3];
+
+  pub_foot_force_.publish(foot_force_msg);
 
 }

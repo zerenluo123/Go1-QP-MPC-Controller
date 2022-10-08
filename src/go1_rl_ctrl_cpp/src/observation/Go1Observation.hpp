@@ -23,6 +23,7 @@
 #include <unitree_legged_msgs/LowCmd.h>
 #include <unitree_legged_msgs/Observation.h>
 #include <unitree_legged_msgs/FootPos.h>
+#include <unitree_legged_msgs/FootForce.h>
 
 
 #include "../Go1Params.hpp"

@@ -40,8 +40,9 @@ class Go1RLController {
 
   void send_foot_pos(Go1CtrlStates &go1_ctrl_states);
 
+  void send_foot_force(Go1CtrlStates &go1_ctrl_states);
 
-    private:
+ private:
   ros::NodeHandle nh_;
   std::string pkgDir_;
 
@@ -52,6 +53,7 @@ class Go1RLController {
   ros::Publisher pub_joint_cmd_[12];
   ros::Publisher pub_obs_;
   ros::Publisher pub_foot_pos_rel_;
+  ros::Publisher pub_foot_force_;
 
   //! YAML parsing of parameter file
   YAML::Node yamlNode_;
