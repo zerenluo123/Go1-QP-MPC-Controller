@@ -38,17 +38,9 @@ Go1RLController::Go1RLController(ros::NodeHandle &nh) {
   pub_foot_pos_rel_ = nh.advertise<unitree_legged_msgs::FootPos>("/gazebo_go1/foot_pos_rel", 1);
   pub_foot_force_ = nh.advertise<unitree_legged_msgs::FootForce>("/gazebo_go1/foot_force", 1);
 
-}
-
-bool Go1RLController::create(double dt) {
-
   // Load parameters
   ROS_INFO_STREAM("[Go1RLController::create] creating");
-
-  //! load NN parameter
   loadNNparams();
-
-  return true;
 }
 
 void Go1RLController::loadNNparams() {
@@ -64,6 +56,7 @@ void Go1RLController::loadNNparams() {
 }
 
 bool Go1RLController::advance(double dt) {
+  // walk
   // updata obs except for actions
   go1Obs_->updateObservation(dt);
   Eigen::VectorXd proprioObs = go1Obs_->getObservation(); // dim=36
@@ -72,16 +65,7 @@ bool Go1RLController::advance(double dt) {
   Eigen::VectorXf obs(proprioObs.size() + 12); // full observation; dim=48
   obs << proprioObs.cast<float>(), prevActionDouble_.cast<float>();
 
-  // get movement mode, 0: stand, 1: walking
-  go1_ctrl_states_ = go1Obs_->getCtrlState();
-
-  if (go1_ctrl_states_.movement_mode == 0) {  // stand
-    standPolicy_.run(obs, action_);
-  } else { // walk
-    policy_.run(obs, action_);
-  }
-
-//  policy_.run(obs, action_);
+  policy_.run(obs, action_);
   actionDouble_ = action_.cast<double>();
 
   // add clip to the action(should be of little use)
@@ -103,7 +87,7 @@ bool Go1RLController::advance(double dt) {
 }
 
 bool Go1RLController::send_cmd() {
-//  _root_control.compute_joint_torques(a1_ctrl_states);
+//  _root_control.compute_joint_torques(go1_ctrl_states_);
 
   // send control cmd to robot via ros topic
   unitree_legged_msgs::LowCmd low_cmd;
@@ -114,7 +98,7 @@ bool Go1RLController::send_cmd() {
     low_cmd.motorCmd[i].dq = 0;
     low_cmd.motorCmd[i].Kp = 0;
     low_cmd.motorCmd[i].Kd = 0;
-    low_cmd.motorCmd[i].tau = torques_[i];
+    low_cmd.motorCmd[i].tau = torques_(i);
     pub_joint_cmd_[i].publish(low_cmd.motorCmd[i]); // please note the joint order, should be consistent with the issac gym
   }
 

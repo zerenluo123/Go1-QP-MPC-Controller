@@ -2,7 +2,7 @@
 // Created by shuoy on 10/19/21.
 //
 
-#include "A1RobotControl.h"
+#include "A1RobotControl.hpp"
 
 A1RobotControl::A1RobotControl() {
     std::cout << "init A1RobotControl" << std::endl;
@@ -279,7 +279,7 @@ void A1RobotControl::generate_swing_legs_ctrl(Go1CtrlStates &state, double dt) {
         }
     }
 
-    std::cout << "foot_pos_recent_contact z: " << state.foot_pos_recent_contact.block<1, 4>(2, 0) << std::endl;
+//    std::cout << "foot_pos_recent_contact z: " << state.foot_pos_recent_contact.block<1, 4>(2, 0) << std::endl;
 
     state.foot_forces_kin = foot_forces_kin;
 }
@@ -388,7 +388,7 @@ Eigen::Matrix<double, 3, NUM_LEG> A1RobotControl::compute_grf(Go1CtrlStates &sta
     std::chrono::duration<double, std::milli> ms_double_1 = t2 - t1;
     std::chrono::duration<double, std::milli> ms_double_2 = t3 - t2;
 
-    std::cout << "qp solver init time: " << ms_double_1.count() << "ms; solve time: " << ms_double_2.count() << "ms" << std::endl;
+//    std::cout << "qp solver init time: " << ms_double_1.count() << "ms; solve time: " << ms_double_2.count() << "ms" << std::endl;
 
     Eigen::VectorXd QPSolution = solver.getSolution(); //12x1
     for (int i = 0; i < NUM_LEG; ++i) {

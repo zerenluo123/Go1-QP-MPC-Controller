@@ -30,6 +30,10 @@ include_directories(
         ${catkin_INCLUDE_DIRS}
 )
 
+# to find osqp.h
+include_directories($ENV{UNITREE_LOCAL_INSTALL}/include/osqp)
+find_package(OsqpEigen REQUIRED)
+
 # add unitree hardware library, these flags must be correctly set
 include_directories(
         $ENV{UNITREE_LEGGED_SDK_PATH}/include
@@ -43,6 +47,8 @@ set(EXTRA_LIBS -pthread libunitree_legged_sdk.so)
 add_library(go1_lib
         src/legKinematics/Go1Kinematics.hpp
         src/legKinematics/Go1Kinematics.cpp
+        src/stand_policy/A1RobotControl.hpp
+        src/stand_policy/A1RobotControl.cpp
         src/Go1Params.hpp
         src/Go1CtrlStates.hpp
         src/utils/Utils.hpp
@@ -50,8 +56,9 @@ add_library(go1_lib
         src/EKF/Go1BasicEKF.hpp
         src/EKF/Go1BasicEKF.cpp
         src/observation/Go1Observation.hpp
-        src/observation/Go1HardwareObservation.hpp)
-target_link_libraries(go1_lib ${catkin_LIBRARIES})
+        src/observation/Go1HardwareObservation.hpp
+        src/SwitchController.hpp)
+target_link_libraries(go1_lib ${catkin_LIBRARIES} OsqpEigen::OsqpEigen)
 
 #target_link_libraries(${PACKAGE_NAME} /usr/lib/x86_64-linux-gnu/libtinyxml2.so)
 
@@ -79,7 +86,8 @@ add_library(gazebo_go1_lib
 target_link_libraries(gazebo_go1_lib
         go1_lib
         torch_eigen
-        libyaml-cpp.so)
+        libyaml-cpp.so
+        )
 
 # hardware
 add_library(hardware_go1_lib
@@ -89,7 +97,15 @@ add_library(hardware_go1_lib
 target_link_libraries(hardware_go1_lib
         go1_lib
         torch_eigen
-        libyaml-cpp.so)
+        libyaml-cpp.so
+        )
+
+# lib of different types of robots
+add_library(gazebo_a1_lib
+        src/GazeboA1ROS.h
+        src/GazeboA1ROS.cpp
+        )
+target_link_libraries(gazebo_a1_lib go1_lib)
 
 # Declare a cpp executable for gazebo robot
 # gazebo
@@ -98,4 +114,9 @@ target_link_libraries(gazebo_go1_ctrl
         ${catkin_LIBRARIES}
         ${TORCH_LIBRARIES}
         gazebo_go1_lib
+        gazebo_a1_lib
+        OsqpEigen::OsqpEigen
         )
+
+
+# ************************** DEBUG **************************

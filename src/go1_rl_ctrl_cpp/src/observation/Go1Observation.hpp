@@ -33,6 +33,8 @@
 #include "../EKF/Go1BasicEKF.hpp"
 #include "../legKinematics/Go1Kinematics.hpp"
 
+#include "../stand_policy/A1RobotControl.hpp"
+
 
 // TODO: compute the observation vector as the one in issac gym legged_robot.py
 class Go1Observation{
@@ -90,6 +92,9 @@ class Go1Observation{
     joy_cmd_ctrl_state_change_request_ = false;
     prev_joy_cmd_ctrl_state_ = 0;
     joy_cmd_exit_ = false;
+
+    go1_ctrl_states_.reset();
+    go1_ctrl_states_.resetFromROSParam(nh);
 
     // don't know if filter is needed
     acc_x_ = MovingWindowFilter(5);
@@ -160,6 +165,11 @@ class Go1Observation{
     // clip the observation
     obScaled_ = obScaled_.cwiseMin(clipObs_).cwiseMax(-clipObs_);
 
+    updateMovementMode();
+
+  }
+
+  void updateMovementMode() { // keep this: the movement mode in ctrl state is used in the EKF.
     // update joy cmd
     prev_joy_cmd_ctrl_state_ = joy_cmd_ctrl_state_;
 
@@ -176,21 +186,21 @@ class Go1Observation{
       go1_ctrl_states_.movement_mode = 1;
     } else if (joy_cmd_ctrl_state_ == 0 && prev_joy_cmd_ctrl_state_ == 1) {
       // leave walking mode
-      // lock current position, should just happen for one instance
       go1_ctrl_states_.movement_mode = 0;
     } else {
       go1_ctrl_states_.movement_mode = 0;
     }
 
-  }
+  } // updateMovementMode
 
   Eigen::VectorXd getObservation() { return obScaled_; }
   Go1CtrlStates getCtrlState() { return go1_ctrl_states_; }
+  int getMovementMode() { return go1_ctrl_states_.movement_mode; }
 
 
   void joy_callback(const sensor_msgs::Joy::ConstPtr &joy_msg) { // This function applies for both gazebo and hardware
-//  // left updown: change body height, not need now
-//  joy_cmd_velz = joy_msg->axes[1] * JOY_CMD_BODY_HEIGHT_VEL;
+    // left updown: change body height, not need now
+    joy_cmd_velz_ = joy_msg->axes[1] * JOY_CMD_BODY_HEIGHT_VEL;
 
     //A
     if (joy_msg->buttons[0] == 1) {
@@ -203,6 +213,11 @@ class Go1Observation{
     joy_cmd_vely_ = joy_msg->axes[3] * JOY_CMD_VELY_MAX;
     // left horiz
     joy_cmd_yaw_rate_ = joy_msg->axes[0] * JOY_CMD_YAW_MAX;
+    // up-down button
+    joy_cmd_pitch_rate_ = joy_msg->axes[7] * JOY_CMD_PITCH_MAX;
+    // left-right button
+    joy_cmd_roll_rate_ = joy_msg->axes[6] * JOY_CMD_ROLL_MAX;
+
 
     // lb
     if (joy_msg->buttons[4] == 1) {
@@ -254,8 +269,12 @@ class Go1Observation{
       Eigen::Vector3d tmp_vec = go1_ctrl_states_.joint_vel.segment<3>(3 * i);
       go1_ctrl_states_.foot_vel_rel.block<3, 1>(0, i) = tmp_mtx * tmp_vec;
 
-    }
+      go1_ctrl_states_.foot_pos_abs.block<3, 1>(0, i) = go1_ctrl_states_.root_rot_mat * go1_ctrl_states_.foot_pos_rel.block<3, 1>(0, i);
+      go1_ctrl_states_.foot_vel_abs.block<3, 1>(0, i) = go1_ctrl_states_.root_rot_mat * go1_ctrl_states_.foot_vel_rel.block<3, 1>(0, i);
 
+      go1_ctrl_states_.foot_pos_world.block<3, 1>(0, i) = go1_ctrl_states_.foot_pos_abs.block<3, 1>(0, i) + go1_ctrl_states_.root_pos;
+      go1_ctrl_states_.foot_vel_world.block<3, 1>(0, i) = go1_ctrl_states_.foot_vel_abs.block<3, 1>(0, i) + go1_ctrl_states_.root_lin_vel;
+    }
   }
 
   void imu_callback(const sensor_msgs::Imu::ConstPtr &imu) {
@@ -434,6 +453,8 @@ class Go1Observation{
   double joy_cmd_vely_ = 0.0;
   double joy_cmd_velz_ = 0.0;
 
+  double joy_cmd_pitch_rate_ = 0.0;
+  double joy_cmd_roll_rate_ = 0.0;
   double joy_cmd_yaw_rate_ = 0.0;
 
   double joy_cmd_body_height_ = 0.3;

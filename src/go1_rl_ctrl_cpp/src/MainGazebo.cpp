@@ -15,6 +15,8 @@
 
 //#include "torch_eigen/TorchEigen.hpp"
 #include "Go1RLController.hpp"
+#include "GazeboA1ROS.h"
+#include "SwitchController.hpp"
 
 
 int main(int argc, char **argv) {
@@ -39,9 +41,11 @@ int main(int argc, char **argv) {
     }
   }
 
-  // create go1 rl controller
+  // create go1 controllers
   std::unique_ptr<Go1RLController> go1_rl = std::make_unique<Go1RLController>(nh);
-  go1_rl->create(0.1);
+  std::unique_ptr<GazeboA1ROS> go1 = std::make_unique<GazeboA1ROS>(nh);
+  std::unique_ptr<SwitchController> switch_ctrl = std::make_unique<SwitchController>(nh);
+
 
   std::atomic<bool> control_execute{};
   control_execute.store(true, std::memory_order_release);
@@ -64,12 +68,16 @@ int main(int argc, char **argv) {
       now = ros::Time::now();
       dt = now - prev;
       prev = now;
-//      std::cout << "dt in thread 1 " << dt.toSec() << "ms" << std::endl;
 
-
-
-      // compute actions
-      bool running = go1_rl->advance(dt.toSec());
+      bool running;
+      switch_ctrl->updateMovementMode();
+      if (switch_ctrl->movement_mode == 0) { // stand
+        // compute desired ground forces
+        running = go1->update_foot_forces_grf(dt.toSec());
+      } else { // walk
+        // compute actions
+        running = go1_rl->advance(dt.toSec());
+      }
 
       auto t2 = std::chrono::high_resolution_clock::now();
       std::chrono::duration<double, std::milli> ms_double = t2 - t1;
@@ -88,12 +96,30 @@ int main(int argc, char **argv) {
   // Thread 2: depolyment on the real system; send commands
   std::cout << "Enter thread 2: Deployment on the real robot, sending command" << std::endl;
   std::thread deploy_thread([&]() {
+    // prepare variables to monitor time and control the while loop
+    ros::Time start = ros::Time::now();
+    ros::Time prev = ros::Time::now();
+    ros::Time now = ros::Time::now();  // bool res = app.exec();
+    ros::Duration dt(0);
+
     while (control_execute.load(std::memory_order_acquire) && ros::ok()) {
       auto t3 = std::chrono::high_resolution_clock::now();
 
       ros::Duration(deployment_frequency / 1000).sleep();
 
-      bool send_cmd_running = go1_rl->send_cmd();
+      // get t and dt
+      now = ros::Time::now();
+      dt = now - prev;
+      prev = now;
+
+      bool send_cmd_running;
+      switch_ctrl->updateMovementMode();
+      if (switch_ctrl->movement_mode == 0) { // stand
+        bool main_update_running = go1->main_update(dt.toSec());
+        send_cmd_running = go1->send_cmd();
+      } else { // walk
+        send_cmd_running = go1_rl->send_cmd();
+      }
 
       auto t4 = std::chrono::high_resolution_clock::now();
       std::chrono::duration<double, std::milli> ms_double = t4 - t3;
@@ -113,8 +139,10 @@ int main(int argc, char **argv) {
   spinner.start();
 
   compute_action_thread.join();
-//  deploy_thread.join();
+  deploy_thread.join();
 
   return 0;
 
 }
+
+

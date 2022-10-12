@@ -178,21 +178,21 @@ public:
         double go1_default_foot_pos_RR_y;
         double go1_default_foot_pos_RR_z;
 
-        _nh.param("go1_default_foot_pos_FL_x", go1_default_foot_pos_FL_x, 0.25);
+        _nh.param("go1_default_foot_pos_FL_x", go1_default_foot_pos_FL_x, 0.17);
         _nh.param("go1_default_foot_pos_FL_y", go1_default_foot_pos_FL_y, 0.15);
-        _nh.param("go1_default_foot_pos_FL_z", go1_default_foot_pos_FL_z, -0.33);
+        _nh.param("go1_default_foot_pos_FL_z", go1_default_foot_pos_FL_z, -0.35);
 
-        _nh.param("go1_default_foot_pos_FR_x", go1_default_foot_pos_FR_x, 0.25);
+        _nh.param("go1_default_foot_pos_FR_x", go1_default_foot_pos_FR_x, 0.17);
         _nh.param("go1_default_foot_pos_FR_y", go1_default_foot_pos_FR_y, -0.15);
-        _nh.param("go1_default_foot_pos_FR_z", go1_default_foot_pos_FR_z, -0.33);
+        _nh.param("go1_default_foot_pos_FR_z", go1_default_foot_pos_FR_z, -0.35);
 
         _nh.param("go1_default_foot_pos_RL_x", go1_default_foot_pos_RL_x, -0.17);
         _nh.param("go1_default_foot_pos_RL_y", go1_default_foot_pos_RL_y, 0.15);
-        _nh.param("go1_default_foot_pos_RL_z", go1_default_foot_pos_RL_z, -0.33);
+        _nh.param("go1_default_foot_pos_RL_z", go1_default_foot_pos_RL_z, -0.35);
 
         _nh.param("go1_default_foot_pos_RR_x", go1_default_foot_pos_RR_x, -0.17);
         _nh.param("go1_default_foot_pos_RR_y", go1_default_foot_pos_RR_y, -0.15);
-        _nh.param("go1_default_foot_pos_RR_z", go1_default_foot_pos_RR_z, -0.33);
+        _nh.param("go1_default_foot_pos_RR_z", go1_default_foot_pos_RR_z, -0.35);
 
         default_foot_pos << go1_default_foot_pos_FL_x, go1_default_foot_pos_FR_x, go1_default_foot_pos_RL_x, go1_default_foot_pos_RR_x,
                 go1_default_foot_pos_FL_y, go1_default_foot_pos_FR_y, go1_default_foot_pos_RL_y, go1_default_foot_pos_RR_y,
@@ -250,17 +250,17 @@ public:
 
         double go1_kp_foot_x, go1_kp_foot_y, go1_kp_foot_z, go1_kd_foot_x, go1_kd_foot_y, go1_kd_foot_z, go1_km_foot_x, go1_km_foot_y, go1_km_foot_z;
 
-        _nh.param("go1_kp_foot_x", go1_kp_foot_x, 150.0);
-        _nh.param("go1_kp_foot_y", go1_kp_foot_y, 150.0);
+        _nh.param("go1_kp_foot_x", go1_kp_foot_x, 200.0);
+        _nh.param("go1_kp_foot_y", go1_kp_foot_y, 300.0);
         _nh.param("go1_kp_foot_z", go1_kp_foot_z, 200.0);
 
-        _nh.param("go1_kd_foot_x", go1_kd_foot_x, 0.0);
-        _nh.param("go1_kd_foot_y", go1_kd_foot_y, 0.0);
-        _nh.param("go1_kd_foot_z", go1_kd_foot_z, 0.0);
+        _nh.param("go1_kd_foot_x", go1_kd_foot_x, 4.0);
+        _nh.param("go1_kd_foot_y", go1_kd_foot_y, 4.0);
+        _nh.param("go1_kd_foot_z", go1_kd_foot_z, 4.0);
 
         _nh.param("go1_km_foot_x", go1_km_foot_x, 0.1);
         _nh.param("go1_km_foot_y", go1_km_foot_y, 0.1);
-        _nh.param("go1_km_foot_z", go1_km_foot_z, 0.04);
+        _nh.param("go1_km_foot_z", go1_km_foot_z, 0.1);
 
         kp_foot <<
                 go1_kp_foot_x, go1_kp_foot_x, go1_kp_foot_x, go1_kp_foot_x,
@@ -276,9 +276,9 @@ public:
         double go1_kp_linear_x;
         double go1_kp_linear_y;
         double go1_kp_linear_z;
-        _nh.param("go1_kp_linear_x", go1_kp_linear_x, 120.0);
-        _nh.param("go1_kp_linear_y", go1_kp_linear_y, 120.0);
-        _nh.param("go1_kp_linear_z", go1_kp_linear_z, 500.0);
+        _nh.param("go1_kp_linear_x", go1_kp_linear_x, 100.0);
+        _nh.param("go1_kp_linear_y", go1_kp_linear_y, 100.0);
+        _nh.param("go1_kp_linear_z", go1_kp_linear_z, 300.0);
 
         double go1_kd_linear_x;
         double go1_kd_linear_y;
@@ -290,15 +290,15 @@ public:
         double go1_kp_angular_x;
         double go1_kp_angular_y;
         double go1_kp_angular_z;
-        _nh.param("go1_kp_angular_x", go1_kp_angular_x, 250.0);
-        _nh.param("go1_kp_angular_y", go1_kp_angular_y, 35.0);
+        _nh.param("go1_kp_angular_x", go1_kp_angular_x, 150.0);
+        _nh.param("go1_kp_angular_y", go1_kp_angular_y, 150.0);
         _nh.param("go1_kp_angular_z", go1_kp_angular_z, 1.0);
 
         double go1_kd_angular_x;
         double go1_kd_angular_y;
         double go1_kd_angular_z;
-        _nh.param("go1_kd_angular_x", go1_kd_angular_x, 1.5);
-        _nh.param("go1_kd_angular_y", go1_kd_angular_y, 1.5);
+        _nh.param("go1_kd_angular_x", go1_kd_angular_x, 4.5);
+        _nh.param("go1_kd_angular_y", go1_kd_angular_y, 4.5);
         _nh.param("go1_kd_angular_z", go1_kd_angular_z, 30.0);
 
         kp_linear_lock_x = go1_kp_linear_x;
