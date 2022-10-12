@@ -2,7 +2,7 @@
 // Created by zixin on 11/1/21.
 //
 
-#include "GazeboA1ROS.h"
+#include "GazeboA1ROS.hpp"
 
 // constructor
 GazeboA1ROS::GazeboA1ROS(ros::NodeHandle &_nh) {

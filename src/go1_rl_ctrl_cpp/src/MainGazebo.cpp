@@ -15,7 +15,7 @@
 
 //#include "torch_eigen/TorchEigen.hpp"
 #include "Go1RLController.hpp"
-#include "GazeboA1ROS.h"
+#include "stand_policy/GazeboA1ROS.hpp"
 #include "SwitchController.hpp"
 
 

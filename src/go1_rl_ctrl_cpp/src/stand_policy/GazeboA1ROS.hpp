@@ -35,14 +35,14 @@
 // #include <gazebo_msgs/ModelStates.h>
 
 // control parameters
-#include "Go1Params.hpp"
-#include "Go1CtrlStates.hpp"
-#include "stand_policy/A1RobotControl.hpp"
-#include "EKF/Go1BasicEKF.hpp"
-#include "legKinematics/Go1Kinematics.hpp"
-#include "utils/Utils.hpp"
+#include "../Go1Params.hpp"
+#include "../Go1CtrlStates.hpp"
+#include "A1RobotControl.hpp"
+#include "../EKF/Go1BasicEKF.hpp"
+#include "../legKinematics/Go1Kinematics.hpp"
+#include "../utils/Utils.hpp"
 
-#include "utils/filter.hpp"
+#include "../utils/filter.hpp"
 
 class GazeboA1ROS {
 public:

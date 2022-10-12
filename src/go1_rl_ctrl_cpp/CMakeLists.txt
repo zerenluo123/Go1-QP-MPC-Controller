@@ -102,8 +102,8 @@ target_link_libraries(hardware_go1_lib
 
 # lib of different types of robots
 add_library(gazebo_a1_lib
-        src/GazeboA1ROS.h
-        src/GazeboA1ROS.cpp
+        src/stand_policy/GazeboA1ROS.hpp
+        src/stand_policy/GazeboA1ROS.cpp
         )
 target_link_libraries(gazebo_a1_lib go1_lib)
 
