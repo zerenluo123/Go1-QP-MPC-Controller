@@ -33,9 +33,6 @@
 #include "../EKF/Go1BasicEKF.hpp"
 #include "../legKinematics/Go1Kinematics.hpp"
 
-#include "../stand_policy/A1RobotControl.hpp"
-
-
 // TODO: compute the observation vector as the one in issac gym legged_robot.py
 class Go1Observation{
  public:

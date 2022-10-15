@@ -22,9 +22,6 @@
 #include "observation/Go1Observation.hpp"
 #include "Go1CtrlStates.hpp"
 
-// stand policy
-#include "stand_policy/A1RobotControl.hpp"
-
 
 class Go1RLController {
  public:
@@ -90,8 +87,5 @@ class Go1RLController {
 
   // ! go1 control state
   Go1CtrlStates go1_ctrl_states_;
-
-  //! QP-based stand poliy
-  A1RobotControl _root_control;
 
 };

@@ -15,7 +15,6 @@
 
 //#include "torch_eigen/TorchEigen.hpp"
 #include "Go1RLController.hpp"
-#include "stand_policy/GazeboA1ROS.hpp"
 #include "SwitchController.hpp"
 #include "servo_stand_policy/GazeboServo.hpp"
 
@@ -44,7 +43,6 @@ int main(int argc, char **argv) {
 
   // create go1 controllers
   std::unique_ptr<Go1RLController> go1_rl = std::make_unique<Go1RLController>(nh);
-  std::unique_ptr<GazeboA1ROS> go1 = std::make_unique<GazeboA1ROS>(nh);
   std::unique_ptr<SwitchController> switch_ctrl = std::make_unique<SwitchController>(nh);
   std::unique_ptr<GazeboServo> servo = std::make_unique<GazeboServo>(nh);
 

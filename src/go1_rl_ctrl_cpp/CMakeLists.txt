@@ -47,8 +47,6 @@ set(EXTRA_LIBS -pthread libunitree_legged_sdk.so)
 add_library(go1_lib
         src/legKinematics/Go1Kinematics.hpp
         src/legKinematics/Go1Kinematics.cpp
-        src/stand_policy/A1RobotControl.hpp
-        src/stand_policy/A1RobotControl.cpp
         src/Go1Params.hpp
         src/Go1CtrlStates.hpp
         src/utils/Utils.hpp
@@ -101,18 +99,7 @@ target_link_libraries(hardware_go1_lib
         )
 
 # lib of different types of robots
-# gazebo (stand)
-add_library(gazebo_a1_lib
-        src/stand_policy/GazeboA1ROS.hpp
-        src/stand_policy/GazeboA1ROS.cpp
-        )
-target_link_libraries(gazebo_a1_lib go1_lib)
-
 # gazebo (servo_stand)
-#add_library(gazebo_servo_lib
-#        src/servo_stand_policy/body.h
-#        src/servo_stand_policy/body.cpp
-#        )
 add_library(gazebo_servo_lib
         src/servo_stand_policy/GazeboServo.hpp
         src/servo_stand_policy/GazeboServo.cpp
@@ -139,8 +126,6 @@ target_link_libraries(gazebo_go1_ctrl
         ${catkin_LIBRARIES}
         ${TORCH_LIBRARIES}
         gazebo_go1_lib
-        gazebo_a1_lib
-        OsqpEigen::OsqpEigen
         gazebo_servo_lib
         )
 
