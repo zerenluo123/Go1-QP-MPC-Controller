@@ -1,0 +1,7 @@
+<launch>
+    <arg name="type" default="hardware"/>
+
+    <rosparam file="$(find go1_rl_ctrl_cpp)/config/hardware_parameters.yaml" command="load"/>
+
+    <node pkg="go1_rl_ctrl_cpp" type="$(arg type)_go1_ctrl" name="$(arg type)_go1_ctrl" output="screen"/>
+</launch>

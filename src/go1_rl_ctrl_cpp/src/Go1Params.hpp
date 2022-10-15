@@ -16,9 +16,9 @@
 #define JOY_CMD_BODY_HEIGHT_MAX 0.32     // m
 #define JOY_CMD_BODY_HEIGHT_MIN 0.1     // m
 #define JOY_CMD_BODY_HEIGHT_VEL 0.04    // m/s
-#define JOY_CMD_VELX_MAX 0.7         // m/s
+#define JOY_CMD_VELX_MAX 0.6         // m/s
 #define JOY_CMD_VELY_MAX 0.3           // m/s
-#define JOY_CMD_YAW_MAX 0.9             // rad
+#define JOY_CMD_YAW_MAX 0.7             // rad
 #define JOY_CMD_PITCH_MAX 0.4           // rad
 #define JOY_CMD_ROLL_MAX 0.4            // rad
 

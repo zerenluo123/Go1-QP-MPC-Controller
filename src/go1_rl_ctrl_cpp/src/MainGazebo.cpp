@@ -17,6 +17,7 @@
 #include "Go1RLController.hpp"
 #include "stand_policy/GazeboA1ROS.hpp"
 #include "SwitchController.hpp"
+#include "servo_stand_policy/GazeboServo.hpp"
 
 
 int main(int argc, char **argv) {
@@ -45,6 +46,7 @@ int main(int argc, char **argv) {
   std::unique_ptr<Go1RLController> go1_rl = std::make_unique<Go1RLController>(nh);
   std::unique_ptr<GazeboA1ROS> go1 = std::make_unique<GazeboA1ROS>(nh);
   std::unique_ptr<SwitchController> switch_ctrl = std::make_unique<SwitchController>(nh);
+  std::unique_ptr<GazeboServo> servo = std::make_unique<GazeboServo>(nh);
 
 
   std::atomic<bool> control_execute{};
@@ -73,7 +75,8 @@ int main(int argc, char **argv) {
       switch_ctrl->updateMovementMode();
       if (switch_ctrl->movement_mode == 0) { // stand
         // compute desired ground forces
-        running = go1->update_foot_forces_grf(dt.toSec());
+//        running = go1->update_foot_forces_grf(dt.toSec());
+        running = servo->state_pub();
       } else { // walk
         // compute actions
         running = go1_rl->advance(dt.toSec());
@@ -115,8 +118,9 @@ int main(int argc, char **argv) {
       bool send_cmd_running;
       switch_ctrl->updateMovementMode();
       if (switch_ctrl->movement_mode == 0) { // stand
-        bool main_update_running = go1->main_update(dt.toSec());
-        send_cmd_running = go1->send_cmd();
+//        bool main_update_running = go1->main_update(dt.toSec());
+//        send_cmd_running = go1->send_cmd();
+        send_cmd_running = servo->send_cmd();
       } else { // walk
         send_cmd_running = go1_rl->send_cmd();
       }

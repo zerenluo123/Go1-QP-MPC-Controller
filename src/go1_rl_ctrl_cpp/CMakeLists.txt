@@ -101,11 +101,36 @@ target_link_libraries(hardware_go1_lib
         )
 
 # lib of different types of robots
+# gazebo (stand)
 add_library(gazebo_a1_lib
         src/stand_policy/GazeboA1ROS.hpp
         src/stand_policy/GazeboA1ROS.cpp
         )
 target_link_libraries(gazebo_a1_lib go1_lib)
+
+# gazebo (servo_stand)
+#add_library(gazebo_servo_lib
+#        src/servo_stand_policy/body.h
+#        src/servo_stand_policy/body.cpp
+#        )
+add_library(gazebo_servo_lib
+        src/servo_stand_policy/GazeboServo.hpp
+        src/servo_stand_policy/GazeboServo.cpp
+        )
+
+# hardware (servo_stand)
+add_library(hardware_servo_lib
+        src/servo_stand_policy/HardwareServo.hpp
+        src/servo_stand_policy/HardwareServo.cpp
+        )
+target_link_libraries(hardware_servo_lib ${EXTRA_LIBS})
+
+# hardware (servo_stand_switch) for test
+add_library(hardware_servo_switch_lib
+        src/servo_stand_policy/HardwareServoSwitch.hpp
+        src/servo_stand_policy/HardwareServoSwitch.cpp
+        )
+target_link_libraries(hardware_servo_switch_lib ${EXTRA_LIBS})
 
 # Declare a cpp executable for gazebo robot
 # gazebo
@@ -116,7 +141,27 @@ target_link_libraries(gazebo_go1_ctrl
         gazebo_go1_lib
         gazebo_a1_lib
         OsqpEigen::OsqpEigen
+        gazebo_servo_lib
         )
 
 
 # ************************** DEBUG **************************
+# Declare a cpp executable for hardware robot
+add_executable(hardware_go1_ctrl src/MainHardware.cpp)
+target_link_libraries(hardware_go1_ctrl
+        hardware_servo_lib
+        hardware_servo_switch_lib
+        ${catkin_LIBRARIES}
+        ${EXTRA_LIBS}
+        )
+
+#add_executable(stand_servo src/servo_stand_policy/servo.cpp)
+#target_link_libraries(stand_servo
+#        gazebo_servo_lib
+#        ${catkin_LIBRARIES}
+#        )
+
+
+
+
+

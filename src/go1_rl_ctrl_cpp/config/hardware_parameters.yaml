@@ -9,3 +9,4 @@ weights: cpp_model.pt
 action_update_frequency: 0.5 # ms
 
 deployment_frequency: 0.5 # ms
+
