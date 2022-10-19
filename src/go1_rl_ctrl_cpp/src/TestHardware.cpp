@@ -2,6 +2,8 @@
 // Created by zixin on 11/1/21.
 //
 // stl
+#include "Go1RLHardwareController.hpp"
+
 #include <iostream>
 #include <iomanip>
 #include <memory>
@@ -13,14 +15,21 @@
 #include <ros/console.h>
 #include <sensor_msgs/Imu.h>
 
-//#include "torch_eigen/TorchEigen.hpp"
-#include "Go1RLController.hpp"
+// control parameters
+#include "Go1Params.hpp"
+#include "servo_stand_policy/HardwareServo.hpp"
+#include "servo_stand_policy/HardwareServoSwitch.hpp"
 #include "SwitchController.hpp"
-#include "servo_stand_policy/GazeboServo.hpp"
+
 
 
 int main(int argc, char **argv) {
-  ros::init(argc, argv, "gazebo_go1_rl_ctrl");
+  std::cout << "Communication level is set to LOW-level." << std::endl
+            << "Stand" << std::endl
+            << "Press Enter to continue..." << std::endl;
+  std::cin.ignore();
+
+  ros::init(argc, argv, "hardware_go1_rl_ctrl");
   ros::NodeHandle nh;
 
   double action_update_frequency, deployment_frequency;
@@ -32,20 +41,20 @@ int main(int argc, char **argv) {
     ros::console::notifyLoggerLevelsChanged();
   }
 
-  // make sure the ROS infra using sim time, otherwise the controller cannot run with correct time steps
-  bool use_sim_time;
-  if (ros::param::get("use_sim_time", use_sim_time)) {
-    if (!use_sim_time) {
-      ROS_WARN_STREAM(" ROS must set use_sim_time in order to use this program! ");
+  // make sure the ROS infra DO NOT use sim time, otherwise the controller cannot run with correct time steps
+  std::string use_sim_time;
+  if (ros::param::get("/use_sim_time", use_sim_time)) {
+    if (use_sim_time != "false") {
+      std::cout << "hardware must have real time in order to use this program!" << std::endl;
       return -1;
     }
   }
 
   // create go1 controllers
-  std::unique_ptr<Go1RLController> go1_rl = std::make_unique<Go1RLController>(nh);
+  std::unique_ptr<Go1RLHardwareController> go1_rl = std::make_unique<Go1RLHardwareController>(nh);
   std::unique_ptr<SwitchController> switch_ctrl = std::make_unique<SwitchController>(nh);
-  std::unique_ptr<GazeboServo> servo = std::make_unique<GazeboServo>(nh);
-
+  std::unique_ptr<HardwareServo> servo = std::make_unique<HardwareServo>();
+  std::unique_ptr<HardwareServoSwitch> servo_switch = std::make_unique<HardwareServoSwitch>();
 
   std::atomic<bool> control_execute{};
   control_execute.store(true, std::memory_order_release);
@@ -58,10 +67,11 @@ int main(int argc, char **argv) {
     ros::Time prev = ros::Time::now();
     ros::Time now = ros::Time::now();  // bool res = app.exec();
     ros::Duration dt(0);
+    ros::Duration dt_solver_time(0);
 
     while (control_execute.load(std::memory_order_acquire) && ros::ok()) {
 
-      ros::Duration(action_update_frequency / 1000).sleep();
+//      ros::Duration(action_update_frequency / 1000).sleep();
 
       // get t and dt
       now = ros::Time::now();
@@ -73,18 +83,19 @@ int main(int argc, char **argv) {
       bool running;
       switch_ctrl->updateMovementMode();
       if (switch_ctrl->movement_mode == 0) { // stand
-        // compute desired ground forces
-//        running = go1->update_foot_forces_grf(dt.toSec());
-        running = servo->state_pub();
+        // servo controller
+        running = servo->UDPRecv();
       } else { // walk
-        // compute actions
-        running = go1_rl->advance(dt.toSec());
+//        running = servo_switch->UDPRecv();
+        running = go1_rl->advance();
       }
+
+      dt_solver_time = ros::Time::now() - now;
 
       auto t2 = std::chrono::high_resolution_clock::now();
       std::chrono::duration<double, std::milli> ms_double = t2 - t1;
       if (switch_ctrl->movement_mode == 1) { // stand
-        std::cout << "Controller solution is updated in " << ms_double.count() << "ms" << std::endl;
+        std::cout << "thread 1 solution is updated in " << ms_double.count() << "ms" << std::endl;
       }
 
       if (!running) {
@@ -92,6 +103,10 @@ int main(int argc, char **argv) {
         ros::shutdown();
         std::terminate();
         break;
+      }
+
+      if (dt_solver_time.toSec() < ACTION_UPDATE_FREQUENCY / 1000) {
+        ros::Duration( ACTION_UPDATE_FREQUENCY / 1000 - dt_solver_time.toSec() ).sleep();
       }
     }
 
@@ -105,11 +120,10 @@ int main(int argc, char **argv) {
     ros::Time prev = ros::Time::now();
     ros::Time now = ros::Time::now();  // bool res = app.exec();
     ros::Duration dt(0);
+    ros::Duration dt_solver_time(0);
 
     while (control_execute.load(std::memory_order_acquire) && ros::ok()) {
-      auto t3 = std::chrono::high_resolution_clock::now();
-
-      ros::Duration(deployment_frequency / 1000).sleep();
+//      auto t3 = std::chrono::high_resolution_clock::now();
 
       // get t and dt
       now = ros::Time::now();
@@ -119,16 +133,12 @@ int main(int argc, char **argv) {
       bool send_cmd_running;
       switch_ctrl->updateMovementMode();
       if (switch_ctrl->movement_mode == 0) { // stand
-//        bool main_update_running = go1->main_update(dt.toSec());
-//        send_cmd_running = go1->send_cmd();
+        // servo controller
         send_cmd_running = servo->send_cmd();
       } else { // walk
+//        send_cmd_running = servo_switch->send_cmd();
         send_cmd_running = go1_rl->send_cmd();
       }
-
-      auto t4 = std::chrono::high_resolution_clock::now();
-      std::chrono::duration<double, std::milli> ms_double = t4 - t3;
-//      std::cout << "Thread 2 is updated in " << ms_double.count() << "ms" << std::endl;
 
       if (!send_cmd_running) {
         std::cout << "Thread 2 loop is terminated because of errors." << std::endl;
@@ -137,6 +147,10 @@ int main(int argc, char **argv) {
         break;
       }
 
+      dt_solver_time = ros::Time::now() - now;
+      if (dt_solver_time.toSec() < DEPLOYMENT_FREQUENCY / 1000) {
+        ros::Duration( DEPLOYMENT_FREQUENCY / 1000 - dt_solver_time.toSec() ).sleep();
+      }
     }
   });
 

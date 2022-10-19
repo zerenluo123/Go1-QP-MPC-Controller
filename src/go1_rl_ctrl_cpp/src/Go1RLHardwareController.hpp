@@ -32,8 +32,13 @@
 
 // control parameters
 #include "Go1Params.hpp"
-#include "observation/Go1HardwareObservation.hpp"
+//#include "observation/Go1HardwareObservation.hpp"
 #include "Go1CtrlStates.hpp"
+#include "Go1Params.hpp"
+#include "utils/Utils.hpp"
+#include "utils/filter.hpp"
+#include "EKF/Go1BasicEKF.hpp"
+#include "legKinematics/Go1Kinematics.hpp"
 
 // go1 hardware
 #include "unitree_legged_sdk/unitree_legged_sdk.h"
@@ -46,18 +51,23 @@ class Go1RLHardwareController {
  public:
   Go1RLHardwareController(ros::NodeHandle &nh);
 
-//  ~Go1RLHardwareController() {
-//    destruct = true;
-//    thread_.join();
-//  }
+  ~Go1RLHardwareController() {
+    destruct = true;
+    thread_.join();
+  }
 
-  bool create(double dt);
-
-  bool advance(double dt);
+  bool advance();
 
   bool send_cmd();
 
   void send_obs(Eigen::VectorXf &obs);
+
+  void joy_callback(const sensor_msgs::Joy::ConstPtr &joy_msg);
+
+  void updateObservation();
+
+  void updateMovementMode();
+
 
  private:
   ros::NodeHandle nh_;
@@ -88,9 +98,20 @@ class Go1RLHardwareController {
   ros::Publisher pub_imu;
   sensor_msgs::JointState joint_foot_msg;
   sensor_msgs::Imu imu_msg;
+  ros::Subscriber sub_joy_msg;
 
-  //! observations & actions
-  std::unordered_map<std::string, Eigen::VectorXd> obsMap_;
+  //! observations & actions for RL controller
+  // ! observation
+  size_t obDim_;
+  Eigen::VectorXd obDouble_, obScaled_;
+  Eigen::VectorXd actionMean_, actionStd_, obMean_, obStd_;
+
+  Eigen::Vector3d linVelScale_, angVelScale_, gravityScale_, commandScale_;
+  Eigen::VectorXd dofPosScale_, dofVelScale_;
+  Eigen::VectorXd scaleFactor_;
+  double clipObs_ = 100.;
+
+  // ! action
   Eigen::VectorXd prevActionDouble_, actionDouble_; // double
   Eigen::VectorXf action_; // float
   Eigen::VectorXd torques_;
@@ -107,8 +128,8 @@ class Go1RLHardwareController {
   //! NN parameter loading
   void loadNNparams();
 
-  //! observation
-  std::unique_ptr<Go1HardwareObservation> go1Obs_;
+//  //! observation
+//  std::unique_ptr<Go1HardwareObservation> go1Obs_;
 
   double clipAction_ = 100.;
   double actionScale_ = 0.25;
@@ -116,8 +137,52 @@ class Go1RLHardwareController {
   double damping_ = 0.5;
 
   // variables related to control and estimation
+  Go1Kinematics go1_kin;
   Go1CtrlStates go1_ctrl_states;
+  Go1BasicEKF go1_estimate;
 
+  // joystic command
+  double joy_cmd_velx = 0.0;
+  double joy_cmd_vely = 0.0;
+  double joy_cmd_velz = 0.0;
+  double joy_cmd_roll_rate = 0.0;
+  double joy_cmd_pitch_rate = 0.0;
+  double joy_cmd_yaw_rate = 0.0;
+  double joy_cmd_pitch_ang = 0.0;
+  double joy_cmd_roll_ang = 0.0;
+  double joy_cmd_body_height = 0.17;
+
+  //  0 is standing, 1 is walking
+  int joy_cmd_ctrl_state = 0;
+  bool joy_cmd_ctrl_state_change_request = false;
+  int prev_joy_cmd_ctrl_state = 0;
+  bool joy_cmd_exit = false;
+
+  // following cade is also in VILEOM
+  // add leg kinematics
+  // the leg kinematics is relative to body frame, which is the center of the robot
+  // following are some parameters that defines the transformation between IMU frame(b) and robot body frame(r)
+  Eigen::Vector3d p_br;
+  Eigen::Matrix3d R_br;
+  // for each leg, there is an offset between the body frame and the hip motor (fx, fy)
+  double leg_offset_x[4] = {};
+  double leg_offset_y[4] = {};
+  // for each leg, there is an offset between the body frame and the hip motor (fx, fy)
+  double motor_offset[4] = {};
+  double upper_leg_length[4] = {};
+  double lower_leg_length[4] = {};
+  std::vector<Eigen::VectorXd> rho_fix_list;
+  std::vector<Eigen::VectorXd> rho_opt_list;
+
+  // go1 hardware foot force filter
+  Eigen::Matrix<double, NUM_LEG, FOOT_FILTER_WINDOW_SIZE> foot_force_filters;
+  Eigen::Matrix<int, NUM_LEG, 1> foot_force_filters_idx;
+  Eigen::Matrix<double, NUM_LEG, 1> foot_force_filters_sum;
+
+
+  // go1 hardware reading thread
+  std::thread thread_;
+  bool destruct = false;
 
 };
 

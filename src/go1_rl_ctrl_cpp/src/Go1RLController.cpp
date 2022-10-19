@@ -10,6 +10,9 @@ Go1RLController::Go1RLController(ros::NodeHandle &nh) {
   ros::param::get("package_dir", pkgDir_);
   ros::param::get("weights", ctrlWeights_);
   ros::param::get("stand_weights", standCtrlWeights_);
+  ros::param::get("stiffness", stiffness_);
+  ros::param::get("damping", damping_);
+
 
   // ROS publisher
   pub_joint_cmd_[0] = nh.advertise<unitree_legged_msgs::MotorCmd>("/go1_gazebo/FL_hip_controller/command", 1);
@@ -78,9 +81,9 @@ bool Go1RLController::advance(double dt) {
   torques_ = stiffness_ * (actionScaled - proprioObs.segment(12, 12)) - damping_ * proprioObs.segment(24, 12);
 
 //  // *********** debug **********
-//  send_obs(obs);
+  send_obs(obs);
 //  send_foot_pos(go1_ctrl_states_);
-//  send_foot_force(go1_ctrl_states_);
+  send_foot_force(go1_ctrl_states_);
 
   return true;
 

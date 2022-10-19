@@ -47,8 +47,8 @@ int main(int argc, char **argv) {
 
     // TODO: create RL controller
     // create servo stand controller
-    std::unique_ptr<HardwareServo> servo = std::make_unique<HardwareServo>(UNITREE_LEGGED_SDK::LOWLEVEL);
-    std::unique_ptr<HardwareServoSwitch> servo_switch = std::make_unique<HardwareServoSwitch>(UNITREE_LEGGED_SDK::LOWLEVEL);
+    std::unique_ptr<HardwareServo> servo = std::make_unique<HardwareServo>();
+    std::unique_ptr<HardwareServoSwitch> servo_switch = std::make_unique<HardwareServoSwitch>();
     std::unique_ptr<SwitchController> switch_ctrl = std::make_unique<SwitchController>(nh);
 
     std::atomic<bool> control_execute{};

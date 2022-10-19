@@ -64,6 +64,8 @@ class Go1RLController {
   Eigen::VectorXd prevActionDouble_, actionDouble_; // double
   Eigen::VectorXf action_; // float
   Eigen::VectorXd torques_;
+  Eigen::VectorXd filtered_torques_;
+
 
   //! controller/policy
   TorchEigen standPolicy_;
@@ -82,8 +84,9 @@ class Go1RLController {
 
   double clipAction_ = 100.;
   double actionScale_ = 0.25;
-  double stiffness_ = 20.;
-  double damping_ = 0.5;
+  double stiffness_ = 18.; // 17.0
+  double damping_ = 18.0; // 3.5
+  double alpha_ = 0.1;
 
   // ! go1 control state
   Go1CtrlStates go1_ctrl_states_;

@@ -40,6 +40,10 @@ class Go1Observation{
     obDim_ = 36;
     obDouble_.setZero(obDim_); obScaled_.setZero(obDim_);
 
+    historyTempMem_.setZero(num_history_stack_*12);
+    jointPosErrorHist_.setZero(num_history_stack_*12);
+    jointVelHist_.setZero(num_history_stack_*12);
+
     // scale factor init
     linVelScale_.setZero();
     angVelScale_.setZero();
@@ -137,7 +141,6 @@ class Go1Observation{
   }
 
   void updateObservation(double dt) {
-    // TODO: get all observation from measurement and concat
 //    // update state estimation, include base position and base velocity(world frame)
 //    if (!go1_estimate_.is_inited()) {
 //      go1_estimate_.init_state(go1_ctrl_states_);
@@ -164,6 +167,17 @@ class Go1Observation{
 
     updateMovementMode();
 
+  }
+
+  void updateHistory() {
+    // TODO: get history of pos, vel (action hist is in the RL controller)
+    historyTempMem_ = jointVelHist_;
+    jointVelHist_.head((num_history_stack_-1) * 12) = historyTempMem_.tail((num_history_stack_-1) * 12);
+    jointVelHist_.tail(12) = go1_ctrl_states_.joint_vel;
+
+    historyTempMem_ = jointPosErrorHist_;
+    jointPosErrorHist_.head((num_history_stack_-1) * 12) = historyTempMem_.tail((num_history_stack_-1) * 12);
+    jointPosErrorHist_.tail(12) = go1_ctrl_states_.joint_pos - go1_ctrl_states_.default_joint_pos;
   }
 
   void updateMovementMode() { // keep this: the movement mode in ctrl state is used in the EKF.
@@ -474,5 +488,11 @@ class Go1Observation{
 
   std::thread thread_;
   bool destruct_ = false;
+
+  // ! history of joint state
+  Eigen::VectorXd historyTempMem_, jointPosErrorHist_, jointVelHist_;
+  int num_history_stack_;
+
+
 
 };

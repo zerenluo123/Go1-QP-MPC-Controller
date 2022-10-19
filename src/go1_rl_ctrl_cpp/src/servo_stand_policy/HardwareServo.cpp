@@ -4,9 +4,8 @@
 
 #include "HardwareServo.hpp"
 
-HardwareServo::HardwareServo(uint8_t level):
-safe(LeggedType::Go1),
-udp(level, 8090, "192.168.123.10", 8007) {
+HardwareServo::HardwareServo():
+safe(UNITREE_LEGGED_SDK::LeggedType::Go1), udp(UNITREE_LEGGED_SDK::LOWLEVEL, 8090, "192.168.123.10", 8007) {
   udp.InitCmdData(cmd);
   paramInit();
 }

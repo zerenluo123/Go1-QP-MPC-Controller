@@ -8,13 +8,10 @@
 #include <stdio.h>
 #include <stdint.h>
 
-using namespace std;
-using namespace UNITREE_LEGGED_SDK;
-
 class HardwareServo
 {
  public:
-  HardwareServo(uint8_t level);
+  HardwareServo();
   bool UDPRecv();
   void RobotControl();
 
@@ -22,10 +19,10 @@ class HardwareServo
   bool send_cmd();
   void moveAllPosition(double* targetPos, double duration);
 
-  Safety safe;
-  UDP udp;
-  LowCmd cmd = {0};
-  LowState state = {0};
+  UNITREE_LEGGED_SDK::Safety safe;
+  UNITREE_LEGGED_SDK::UDP udp;
+  UNITREE_LEGGED_SDK::LowCmd cmd = {0};
+  UNITREE_LEGGED_SDK::LowState state = {0};
 
   float dt = 0.002;     // 0.001~0.01
 };

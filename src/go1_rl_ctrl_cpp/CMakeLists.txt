@@ -53,8 +53,6 @@ add_library(go1_lib
         src/utils/Utils.cpp
         src/EKF/Go1BasicEKF.hpp
         src/EKF/Go1BasicEKF.cpp
-        src/observation/Go1Observation.hpp
-        src/observation/Go1HardwareObservation.hpp
         src/SwitchController.hpp)
 target_link_libraries(go1_lib ${catkin_LIBRARIES} OsqpEigen::OsqpEigen)
 
@@ -78,6 +76,7 @@ set_property(TARGET torch_eigen PROPERTY CXX_STANDARD 14)
 # lib of different types of robots
 # gazebo
 add_library(gazebo_go1_lib
+        src/observation/Go1Observation.hpp
         src/Go1RLController.hpp
         src/Go1RLController.cpp
         )
@@ -96,6 +95,7 @@ target_link_libraries(hardware_go1_lib
         go1_lib
         torch_eigen
         libyaml-cpp.so
+        ${EXTRA_LIBS}
         )
 
 # lib of different types of robots
@@ -131,13 +131,24 @@ target_link_libraries(gazebo_go1_ctrl
 
 
 # ************************** DEBUG **************************
+## Declare a cpp executable for hardware robot
+#add_executable(hardware_go1_ctrl src/MainHardware.cpp)
+#target_link_libraries(hardware_go1_ctrl
+#        hardware_servo_lib
+#        hardware_servo_switch_lib
+#        ${catkin_LIBRARIES}
+#        ${EXTRA_LIBS}
+#        )
+
+
 # Declare a cpp executable for hardware robot
-add_executable(hardware_go1_ctrl src/MainHardware.cpp)
+add_executable(hardware_go1_ctrl src/TestHardware.cpp)
 target_link_libraries(hardware_go1_ctrl
+        hardware_go1_lib
         hardware_servo_lib
         hardware_servo_switch_lib
         ${catkin_LIBRARIES}
-        ${EXTRA_LIBS}
+        ${TORCH_LIBRARIES}
         )
 
 #add_executable(stand_servo src/servo_stand_policy/servo.cpp)
