@@ -10,7 +10,7 @@ action_update_frequency: 0.5 # ms
 
 deployment_frequency: 0.5 # ms
 
-stiffness: 18.0
+stiffness: 16.5
 
-damping: 10.0
+damping: 5.5
 

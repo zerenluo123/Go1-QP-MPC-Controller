@@ -134,6 +134,11 @@ void Go1RLHardwareController::loadNNparams() {
 }
 
 bool Go1RLHardwareController::advance() {
+  if (joy_cmd_exit) {
+    std::cout << "exit " << std::endl;
+    return false;
+  }
+
   // updata obs except for actions.
   // different from the gazebo, the hardware receive state measurement in controller, need to pass the control state to update observation
   updateObservation();

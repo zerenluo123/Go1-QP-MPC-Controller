@@ -12,4 +12,4 @@ deployment_frequency: 2.0 # ms
 
 stiffness: 18.0 # 18.0 for 0.0002 and 5000
 
-damping: 7.0 # 10.0 for 0.0002 and 5000
+damping: 10.0 # 10.0 for 0.0002 and 5000

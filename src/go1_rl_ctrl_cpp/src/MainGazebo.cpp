@@ -83,9 +83,9 @@ int main(int argc, char **argv) {
 
       auto t2 = std::chrono::high_resolution_clock::now();
       std::chrono::duration<double, std::milli> ms_double = t2 - t1;
-      if (switch_ctrl->movement_mode == 1) { // stand
-        std::cout << "Controller solution is updated in " << ms_double.count() << "ms" << std::endl;
-      }
+//      if (switch_ctrl->movement_mode == 1) { // stand
+//        std::cout << "Controller solution is updated in " << ms_double.count() << "ms" << std::endl;
+//      }
 
       if (!running) {
         std::cout << "Thread 1 loop is terminated because of errors." << std::endl;
