@@ -1,0 +1,5 @@
+<launch>
+    <node pkg="data_collection" type="lowlevel_demo" name="lowlevel_demo" output="screen"/>
+<!--     <node pkg="data_collection" type="signal_sine" name="signal_sine" output="screen"/> -->
+
+</launch>
