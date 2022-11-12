@@ -63,9 +63,7 @@ class Go1RLController {
   std::unordered_map<std::string, Eigen::VectorXd> obsMap_;
   Eigen::VectorXd prevActionDouble_, actionDouble_; // double
   Eigen::VectorXf action_; // float
-  Eigen::VectorXd torques_;
-  Eigen::VectorXd filtered_torques_;
-
+  Eigen::VectorXd targetPoses_;
 
   //! controller/policy
   TorchEigen standPolicy_;
@@ -83,10 +81,15 @@ class Go1RLController {
   std::unique_ptr<Go1Observation> go1Obs_;
 
   double clipAction_ = 100.;
+  Eigen::VectorXd clipPoseLower_;
+  Eigen::VectorXd clipPoseUpper_;
+
   double actionScale_ = 0.25;
   double stiffness_ = 18.; // 17.0
   double damping_ = 18.0; // 3.5
   double alpha_ = 0.1;
+  Eigen::VectorXd pGains_;
+  Eigen::VectorXd dGains_;
 
   // ! go1 control state
   Go1CtrlStates go1_ctrl_states_;

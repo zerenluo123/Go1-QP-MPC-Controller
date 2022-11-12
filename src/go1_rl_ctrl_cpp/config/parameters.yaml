@@ -4,7 +4,7 @@ use_sim_time: true # gazebo: true; hardware: false
 
 stand_weights: stand_cpp_model.pt
 
-weights: cpp_model.pt
+weights: position.pt
 
 action_update_frequency: 4.0 # ms
 

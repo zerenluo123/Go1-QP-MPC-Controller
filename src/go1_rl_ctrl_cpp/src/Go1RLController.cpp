@@ -32,7 +32,21 @@ Go1RLController::Go1RLController(ros::NodeHandle &nh) {
   pub_joint_cmd_[11] = nh.advertise<unitree_legged_msgs::MotorCmd>("/go1_gazebo/RR_calf_controller/command", 1);
 
   actionDouble_.setZero(12);  prevActionDouble_.setZero(12);  action_.setZero(12);
-  torques_.setZero(12);
+  targetPoses_.setZero(12);  clipPoseLower_.setZero(12);  clipPoseUpper_.setZero(12);
+  clipPoseLower_ << -0.9425, -0.4817, -2.6285, -0.9425, -0.4817, -2.6285, -0.9425, -0.4817, -2.6285, -0.9425, -0.4817, -2.6285;
+  clipPoseUpper_ << 0.9425,  2.7855, -0.9320,  0.9425,  2.7855, -0.9320,  0.9425,  2.7855, -0.9320,  0.9425,  2.7855, -0.9320;
+
+  // ! set kp kd gains
+  pGains_.setZero(12);  dGains_.setZero(12);
+  pGains_ << 20., 50., 50.,
+             20., 50., 50.,
+             20., 50., 50.,
+             20., 50., 50.;
+  dGains_ << 1., 2., 2.,
+             1., 2., 2.,
+             1., 2., 2.,
+             1., 2., 2.;
+
   // observation
   go1Obs_ = std::make_unique<Go1Observation>(nh);
 
@@ -63,6 +77,7 @@ bool Go1RLController::advance(double dt) {
   // updata obs except for actions
   go1Obs_->updateObservation(dt);
   Eigen::VectorXd proprioObs = go1Obs_->getObservation(); // dim=36
+  go1_ctrl_states_ = go1Obs_->getCtrlState();
 
   // put in action
   Eigen::VectorXf obs(proprioObs.size() + 12); // full observation; dim=48
@@ -75,33 +90,35 @@ bool Go1RLController::advance(double dt) {
   actionDouble_ = actionDouble_.cwiseMin(clipAction_).cwiseMax(-clipAction_);
   prevActionDouble_ = actionDouble_;
 
-  // compute joint torque (PD controller)
+  // compute joint actions (PD controller)
   Eigen::VectorXd actionScaled = actionDouble_ * actionScale_;
-  // pos: proprioObs.segment(12, 12); vel: proprioObs.segment(24, 12)
-  torques_ = stiffness_ * (actionScaled - proprioObs.segment(12, 12)) - damping_ * proprioObs.segment(24, 12);
+  targetPoses_ = actionScaled + go1_ctrl_states_.default_joint_pos;
+  // add clip to target poses
+  targetPoses_ = targetPoses_.cwiseMin(clipPoseUpper_).cwiseMax(clipPoseLower_);
+
 
 //  // *********** debug **********
-  send_obs(obs);
+//  send_obs(obs);
 //  send_foot_pos(go1_ctrl_states_);
-  send_foot_force(go1_ctrl_states_);
+//  send_foot_force(go1_ctrl_states_);
 
   return true;
 
 }
 
 bool Go1RLController::send_cmd() {
-//  _root_control.compute_joint_torques(go1_ctrl_states_);
-
   // send control cmd to robot via ros topic
   unitree_legged_msgs::LowCmd low_cmd;
 
+  // ! assign kp kd value for corresponding joints
+
   for (int i = 0; i < 12; i++) {
     low_cmd.motorCmd[i].mode = 0x0A;
-    low_cmd.motorCmd[i].q = 0;
+    low_cmd.motorCmd[i].q = targetPoses_(i);
     low_cmd.motorCmd[i].dq = 0;
-    low_cmd.motorCmd[i].Kp = 0;
-    low_cmd.motorCmd[i].Kd = 0;
-    low_cmd.motorCmd[i].tau = torques_(i);
+    low_cmd.motorCmd[i].Kp = pGains_(i);
+    low_cmd.motorCmd[i].Kd = dGains_(i);
+    low_cmd.motorCmd[i].tau = 0;
     pub_joint_cmd_[i].publish(low_cmd.motorCmd[i]); // please note the joint order, should be consistent with the issac gym
   }
 
