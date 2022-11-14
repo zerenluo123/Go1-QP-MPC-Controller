@@ -75,7 +75,8 @@ int main(int argc, char **argv) {
       if (switch_ctrl->movement_mode == 0) { // stand
         // compute desired ground forces
 //        running = go1->update_foot_forces_grf(dt.toSec());
-        running = servo->state_pub();
+//        running = servo->state_pub();
+        running = go1_rl->advance_servo(dt.toSec());
       } else { // walk
         // compute actions
         running = go1_rl->advance(dt.toSec());
@@ -116,15 +117,7 @@ int main(int argc, char **argv) {
       dt = now - prev;
       prev = now;
 
-      bool send_cmd_running;
-      switch_ctrl->updateMovementMode();
-      if (switch_ctrl->movement_mode == 0) { // stand
-//        bool main_update_running = go1->main_update(dt.toSec());
-//        send_cmd_running = go1->send_cmd();
-        send_cmd_running = servo->send_cmd();
-      } else { // walk
-        send_cmd_running = go1_rl->send_cmd();
-      }
+      bool send_cmd_running = go1_rl->send_cmd();
 
       auto t4 = std::chrono::high_resolution_clock::now();
       std::chrono::duration<double, std::milli> ms_double = t4 - t3;

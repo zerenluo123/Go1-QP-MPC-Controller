@@ -190,12 +190,12 @@ bool HardwareA1ROS::send_cmd() {
         int swap_i = swap_joint_indices(i);
         cmd.motorCmd[i].tau = a1_ctrl_states.joint_torques(swap_i);
 
-        std::cout << cmd.motorCmd[i].tau << std::endl;
+//        std::cout << cmd.motorCmd[i].tau << std::endl;
 
 
     }
 
-    std::cout << "************** finish print tau ***************" << std::endl;
+//    std::cout << "************** finish print tau ***************" << std::endl;
 
     safe.PositionLimit(cmd);
     safe.PowerProtect(cmd, state, a1_ctrl_states.power_level);

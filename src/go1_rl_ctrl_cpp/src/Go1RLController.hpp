@@ -31,8 +31,9 @@ class Go1RLController {
 //  ~Go1RLController();
 
   bool advance(double dt);
+  bool advance_servo(double dt);
 
-  bool send_cmd();
+    bool send_cmd();
 
   // QP-based stand policy
   bool update_foot_forces_grf(double dt);
@@ -93,5 +94,9 @@ class Go1RLController {
 
   // ! go1 control state
   Go1CtrlStates go1_ctrl_states_;
+
+  // ! servo motion time
+  double servo_motion_time_;
+
 
 };

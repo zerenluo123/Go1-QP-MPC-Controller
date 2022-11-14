@@ -14,9 +14,7 @@ Go1RLHardwareController::Go1RLHardwareController(ros::NodeHandle &nh)
   ros::param::get("stiffness", stiffness_);
   ros::param::get("damping", damping_);
 
-  // ROS publisher; joint cmd(not used in shuo's case)
-  pub_joint_cmd = nh.advertise<sensor_msgs::JointState>("/hardware_go1/joint_torque_cmd", 100);
-
+  // ROS publisher
   // debug joint angle and foot force
   pub_joint_angle = nh.advertise<sensor_msgs::JointState>("/hardware_go1/joint_foot", 100);
 
@@ -106,10 +104,26 @@ Go1RLHardwareController::Go1RLHardwareController(ros::NodeHandle &nh)
   scaleFactor_.setZero(obDim_);
   scaleFactor_ << linVelScale_, angVelScale_, gravityScale_, commandScale_, dofPosScale_, dofVelScale_;
 
-  // action and torque init
+  // action and pose init
   actionDouble_.setZero(12);  prevActionDouble_.setZero(12);  action_.setZero(12);
-  torques_.setZero(12);
-//  // observation(the hardware reading thread is inited in here)
+  targetPoses_.setZero(12);  clipPoseLower_.setZero(12);  clipPoseUpper_.setZero(12);
+  clipPoseLower_ << -0.9425, -0.4817, -2.6285, -0.9425, -0.4817, -2.6285, -0.9425, -0.4817, -2.6285, -0.9425, -0.4817, -2.6285;
+  clipPoseUpper_ << 0.9425,  2.7855, -0.9320,  0.9425,  2.7855, -0.9320,  0.9425,  2.7855, -0.9320,  0.9425,  2.7855, -0.9320;
+
+  // ! set kp kd gains
+  pGains_.setZero(12);  dGains_.setZero(12);
+  pGains_ << 20., 50., 50.,
+      20., 50., 50.,
+      20., 50., 50.,
+      20., 50., 50.;
+  dGains_ << 1., 2., 2.,
+      1., 2., 2.,
+      1., 2., 2.,
+      1., 2., 2.;
+
+  servo_motion_time_ = 0.;
+
+  //  // observation(the hardware reading thread is inited in here)
 //  go1Obs_ = std::make_unique<Go1HardwareObservation>(nh);
 
   // Load parameters
@@ -139,6 +153,15 @@ bool Go1RLHardwareController::advance() {
     return false;
   }
 
+  pGains_ << 25., 45., 45.,
+      25., 45., 45.,
+      25., 45., 45.,
+      25., 45., 45.;
+  dGains_ << 4., 4., 4.,
+      4., 4., 4.,
+      4., 4., 4.,
+      4., 4., 4.;
+
   // updata obs except for actions.
   // different from the gazebo, the hardware receive state measurement in controller, need to pass the control state to update observation
   updateObservation();
@@ -155,13 +178,41 @@ bool Go1RLHardwareController::advance() {
   actionDouble_ = actionDouble_.cwiseMin(clipAction_).cwiseMax(-clipAction_);
   prevActionDouble_ = actionDouble_;
 
-  // compute joint torque (PD controller)
+  // compute joint target pose (PD controller)
   Eigen::VectorXd actionScaled = actionDouble_ * actionScale_;
-  // pos: proprioObs.segment(12, 12); vel: proprioObs.segment(24, 12)
-  torques_ = stiffness_ * (actionScaled - proprioObs.segment(12, 12)) - damping_ * proprioObs.segment(24, 12);
+  targetPoses_ = actionScaled + go1_ctrl_states.default_joint_pos;
+  // add clip to target poses
+  targetPoses_ = targetPoses_.cwiseMin(clipPoseUpper_).cwiseMax(clipPoseLower_);
+
 
 //  // *********** debug **********
 //  send_obs(obs);
+
+  return true;
+
+}
+
+
+bool Go1RLHardwareController::advance_servo() {
+  double targetPos[12] = {0.1, 0.6, -1.3, -0.1, 0.6, -1.3,
+                          0.1, 0.6, -1.3, -0.1, 0.6, -1.3};
+
+  pGains_ << 10., 40., 50.,
+      10., 40., 50.,
+      10., 40., 50.,
+      10., 40., 50.;
+  dGains_ << 3., 4., 2.,
+      3., 4., 2.,
+      3., 4., 2.,
+      3., 4., 2.;
+
+  servo_motion_time_ += 1.0; // duration count
+  double pos[12] ,lastPos[12], percent;
+  for(int j=0; j<12; j++) lastPos[j] = go1_ctrl_states.joint_pos[j];
+  percent = (double)servo_motion_time_/5000;
+  for(int j=0; j<12; j++){
+    targetPoses_[j] = lastPos[j]*(1-percent) + targetPos[j]*percent;
+  }
 
   return true;
 
@@ -175,22 +226,17 @@ bool Go1RLHardwareController::send_cmd() {
   cmd.levelFlag = UNITREE_LEGGED_SDK::LOWLEVEL;
   for (int i = 0; i < NUM_DOF; i++) {
     cmd.motorCmd[i].mode = 0x0A;   // motor switch to servo (PMSM) mode
-    cmd.motorCmd[i].q = UNITREE_LEGGED_SDK::PosStopF; // shut down position control
-    cmd.motorCmd[i].Kp = 0;
-    cmd.motorCmd[i].dq = UNITREE_LEGGED_SDK::VelStopF; // shut down velocity control
-    cmd.motorCmd[i].Kd = 0;
+    cmd.motorCmd[i].tau = 0; // shut down torque control
+    cmd.motorCmd[i].dq = 0; // shut down velocity control
     int swap_i = swap_joint_indices(i);
-    cmd.motorCmd[i].tau = torques_(swap_i); // TODO: use torque calculated in advance function
-
-//    std::cout << torques_(swap_i) << std::endl;
-
+    cmd.motorCmd[i].q = targetPoses_(swap_i); // use target pose calculated in advance function
+    cmd.motorCmd[i].Kp = pGains_(swap_i);
+    cmd.motorCmd[i].Kd = dGains_(swap_i);
   }
-
-//  std::cout << "************** finish print tau ***************" << std::endl;
 
   safe.PositionLimit(cmd);
   safe.PowerProtect(cmd, state, go1_ctrl_states.power_level);
-  safe.PositionProtect(cmd, state, -0.1);
+//  safe.PositionProtect(cmd, state, -0.2);
   udp.SetSend(cmd);
   udp.Send();
 
@@ -209,7 +255,7 @@ void Go1RLHardwareController::udp_init_send() {
     cmd.motorCmd[i].tau = 0;
   }
   safe.PositionLimit(cmd);
-  safe.PositionProtect(cmd, state, -0.1);
+//  safe.PositionProtect(cmd, state, -0.2);
   udp.SetSend(cmd);
   udp.Send();
 }

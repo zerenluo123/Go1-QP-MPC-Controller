@@ -281,7 +281,7 @@ void A1RobotControl::generate_swing_legs_ctrl(A1CtrlStates &state, double dt) {
         }
     }
 
-    std::cout << "foot_pos_recent_contact z: " << state.foot_pos_recent_contact.block<1, 4>(2, 0) << std::endl;
+//    std::cout << "foot_pos_recent_contact z: " << state.foot_pos_recent_contact.block<1, 4>(2, 0) << std::endl;
 
     state.foot_forces_kin = foot_forces_kin;
 }
@@ -367,8 +367,8 @@ Eigen::Matrix<double, 3, NUM_LEG> A1RobotControl::compute_grf(A1CtrlStates &stat
         std_msgs::Float64 terrain_angle_msg;
         terrain_angle_msg.data = terrain_angle * (180 / 3.1415926);
         pub_terrain_angle.publish(terrain_angle_msg); // publish in deg
-        std::cout << "desire pitch in deg: " << state.root_euler_d[1] * (180 / 3.1415926) << std::endl;
-        std::cout << "terrain angle: " << terrain_angle << std::endl;
+//        std::cout << "desire pitch in deg: " << state.root_euler_d[1] * (180 / 3.1415926) << std::endl;
+//        std::cout << "terrain angle: " << terrain_angle << std::endl;
 
         // save calculated terrain pitch angle
         // TODO: limit terrain pitch angle to -30 to 30? 
@@ -434,7 +434,7 @@ Eigen::Matrix<double, 3, NUM_LEG> A1RobotControl::compute_grf(A1CtrlStates &stat
         std::chrono::duration<double, std::milli> ms_double_1 = t2 - t1;
         std::chrono::duration<double, std::milli> ms_double_2 = t3 - t2;
 
-        std::cout << "qp solver init time: " << ms_double_1.count() << "ms; solve time: " << ms_double_2.count() << "ms" << std::endl;
+//        std::cout << "qp solver init time: " << ms_double_1.count() << "ms; solve time: " << ms_double_2.count() << "ms" << std::endl;
 
         Eigen::VectorXd QPSolution = solver.getSolution(); //12x1
         for (int i = 0; i < NUM_LEG; ++i) {

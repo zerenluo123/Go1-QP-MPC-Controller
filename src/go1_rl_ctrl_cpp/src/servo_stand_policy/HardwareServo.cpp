@@ -58,8 +58,8 @@ void HardwareServo::paramInit()
 }
 
 bool HardwareServo::send_cmd() {
-  double pos[12] = {0.0, 0.67, -1.6, -0.0, 0.67, -1.6,
-                    0.0, 0.67, -1.4, -0.0, 0.67, -1.4};
+  double pos[12] = {0.0, 0.6, -1.3, -0.0, 0.6, -1.3,
+                    0.0, 0.6, -1.3, -0.0, 0.6, -1.3};
 
   // motor q command init
   for(int i=0; i<12; i++){

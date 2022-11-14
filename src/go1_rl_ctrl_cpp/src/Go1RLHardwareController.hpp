@@ -57,6 +57,7 @@ class Go1RLHardwareController {
   }
 
   bool advance();
+  bool advance_servo();
 
   bool send_cmd();
 
@@ -115,6 +116,7 @@ class Go1RLHardwareController {
   Eigen::VectorXd prevActionDouble_, actionDouble_; // double
   Eigen::VectorXf action_; // float
   Eigen::VectorXd torques_;
+  Eigen::VectorXd targetPoses_;
 
   //! controller/policy
   TorchEigen standPolicy_;
@@ -132,9 +134,13 @@ class Go1RLHardwareController {
 //  std::unique_ptr<Go1HardwareObservation> go1Obs_;
 
   double clipAction_ = 100.;
+  Eigen::VectorXd clipPoseLower_;
+  Eigen::VectorXd clipPoseUpper_;
   double actionScale_ = 0.25;
   double stiffness_ = 20.;
   double damping_ = 0.5;
+  Eigen::VectorXd pGains_;
+  Eigen::VectorXd dGains_;
 
   // variables related to control and estimation
   Go1Kinematics go1_kin;
@@ -183,6 +189,9 @@ class Go1RLHardwareController {
   // go1 hardware reading thread
   std::thread thread_;
   bool destruct = false;
+
+  // ! servo motion time
+  double servo_motion_time_;
 
 };
 

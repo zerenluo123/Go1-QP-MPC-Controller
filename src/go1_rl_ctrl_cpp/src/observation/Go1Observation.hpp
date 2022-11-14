@@ -207,6 +207,7 @@ class Go1Observation{
   Eigen::VectorXd getObservation() { return obScaled_; }
   Go1CtrlStates getCtrlState() { return go1_ctrl_states_; }
   int getMovementMode() { return go1_ctrl_states_.movement_mode; }
+  Eigen::Matrix<double, NUM_DOF, 1> getJointPose() { return go1_ctrl_states_.joint_pos; }
 
 
   void joy_callback(const sensor_msgs::Joy::ConstPtr &joy_msg) { // This function applies for both gazebo and hardware

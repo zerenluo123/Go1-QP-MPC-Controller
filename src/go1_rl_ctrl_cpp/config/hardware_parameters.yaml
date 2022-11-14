@@ -4,13 +4,12 @@ use_sim_time: false # gazebo: true; hardware: false
 
 stand_weights: stand_cpp_model.pt
 
-weights: cpp_model.pt
+weights: position.pt
 
-action_update_frequency: 0.5 # ms
+action_update_frequency: 3.0 # ms
 
-deployment_frequency: 0.5 # ms
+deployment_frequency: 3.0 # ms
 
-stiffness: 16.5
+go1_hardware_power_level: 6
 
-damping: 5.5
 

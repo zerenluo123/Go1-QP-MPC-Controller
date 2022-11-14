@@ -84,7 +84,8 @@ int main(int argc, char **argv) {
       switch_ctrl->updateMovementMode();
       if (switch_ctrl->movement_mode == 0) { // stand
         // servo controller
-        running = servo->UDPRecv();
+//        running = servo->UDPRecv();
+        running = go1_rl->advance_servo();
       } else { // walk
 //        running = servo_switch->UDPRecv();
         running = go1_rl->advance();
@@ -105,8 +106,8 @@ int main(int argc, char **argv) {
         break;
       }
 
-      if (dt_solver_time.toSec() < ACTION_UPDATE_FREQUENCY / 1000) {
-        ros::Duration( ACTION_UPDATE_FREQUENCY / 1000 - dt_solver_time.toSec() ).sleep();
+      if (dt_solver_time.toSec() < action_update_frequency / 1000) {
+        ros::Duration( action_update_frequency / 1000 - dt_solver_time.toSec() ).sleep();
       }
     }
 
@@ -130,15 +131,7 @@ int main(int argc, char **argv) {
       dt = now - prev;
       prev = now;
 
-      bool send_cmd_running;
-      switch_ctrl->updateMovementMode();
-      if (switch_ctrl->movement_mode == 0) { // stand
-        // servo controller
-        send_cmd_running = servo->send_cmd();
-      } else { // walk
-//        send_cmd_running = servo_switch->send_cmd();
-        send_cmd_running = go1_rl->send_cmd();
-      }
+      bool send_cmd_running = go1_rl->send_cmd();
 
       if (!send_cmd_running) {
         std::cout << "Thread 2 loop is terminated because of errors." << std::endl;
@@ -148,8 +141,8 @@ int main(int argc, char **argv) {
       }
 
       dt_solver_time = ros::Time::now() - now;
-      if (dt_solver_time.toSec() < DEPLOYMENT_FREQUENCY / 1000) {
-        ros::Duration( DEPLOYMENT_FREQUENCY / 1000 - dt_solver_time.toSec() ).sleep();
+      if (dt_solver_time.toSec() < deployment_frequency / 1000) {
+        ros::Duration( deployment_frequency / 1000 - dt_solver_time.toSec() ).sleep();
       }
     }
   });

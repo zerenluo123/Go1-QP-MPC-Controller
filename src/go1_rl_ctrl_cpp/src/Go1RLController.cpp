@@ -47,6 +47,9 @@ Go1RLController::Go1RLController(ros::NodeHandle &nh) {
              1., 2., 2.,
              1., 2., 2.;
 
+  servo_motion_time_ = 0.;
+
+
   // observation
   go1Obs_ = std::make_unique<Go1Observation>(nh);
 
@@ -73,6 +76,15 @@ void Go1RLController::loadNNparams() {
 }
 
 bool Go1RLController::advance(double dt) {
+  pGains_ << 20., 50., 50.,
+      20., 50., 50.,
+      20., 50., 50.,
+      20., 50., 50.;
+  dGains_ << 1., 2., 2.,
+      1., 2., 2.,
+      1., 2., 2.,
+      1., 2., 2.;
+
   // walk
   // updata obs except for actions
   go1Obs_->updateObservation(dt);
@@ -98,13 +110,41 @@ bool Go1RLController::advance(double dt) {
 
 
 //  // *********** debug **********
-//  send_obs(obs);
+  send_obs(obs);
 //  send_foot_pos(go1_ctrl_states_);
 //  send_foot_force(go1_ctrl_states_);
 
   return true;
 
 }
+
+bool Go1RLController::advance_servo(double dt) {
+  double targetPos[12] = {0.1, 0.6, -1.3, -0.1, 0.6, -1.3,
+                          0.1, 0.6, -1.3, -0.1, 0.6, -1.3};
+
+  pGains_ << 20., 30., 60.,
+            20., 30., 60.,
+            20., 80., 140.,
+            20., 80., 140.;
+  dGains_ << 5., 8., 12.,
+          5., 8., 12.,
+          5., 8., 12.,
+          5., 8., 12.;
+
+  Eigen::Matrix<double, NUM_DOF, 1> jointPose = go1Obs_->getJointPose();
+
+  servo_motion_time_ += 1.0; // duration count
+  double pos[12] ,lastPos[12], percent;
+  for(int j=0; j<12; j++) lastPos[j] = jointPose(j, 0);
+  percent = (double)servo_motion_time_/1000;
+  for(int j=0; j<12; j++){
+    targetPoses_[j] = lastPos[j]*(1-percent) + targetPos[j]*percent;
+  }
+
+  return true;
+
+}
+
 
 bool Go1RLController::send_cmd() {
   // send control cmd to robot via ros topic
@@ -131,6 +171,8 @@ bool Go1RLController::send_cmd() {
 void Go1RLController::send_obs(Eigen::VectorXf &obs) {
   // publish the observation
   unitree_legged_msgs::Observation obs_msg;
+
+  obs.segment(12, 12) += go1_ctrl_states_.default_joint_pos.col(0).cast<float>();
 
   obs_msg.lin_vel_x = obs[0];
   obs_msg.lin_vel_y = obs[1];
