@@ -12,24 +12,25 @@ Go1RLController::Go1RLController(ros::NodeHandle &nh) {
   ros::param::get("stand_weights", standCtrlWeights_);
   ros::param::get("stiffness", stiffness_);
   ros::param::get("damping", damping_);
+  ros::param::get("robot_name", robot_name);
 
 
   // ROS publisher
-  pub_joint_cmd_[0] = nh.advertise<unitree_legged_msgs::MotorCmd>("/go1_gazebo/FL_hip_controller/command", 1);
-  pub_joint_cmd_[1] = nh.advertise<unitree_legged_msgs::MotorCmd>("/go1_gazebo/FL_thigh_controller/command", 1);
-  pub_joint_cmd_[2] = nh.advertise<unitree_legged_msgs::MotorCmd>("/go1_gazebo/FL_calf_controller/command", 1);
+  pub_joint_cmd_[0] = nh.advertise<unitree_legged_msgs::MotorCmd>("/" + robot_name + "_gazebo/FL_hip_controller/command", 1);
+  pub_joint_cmd_[1] = nh.advertise<unitree_legged_msgs::MotorCmd>("/" + robot_name + "_gazebo/FL_thigh_controller/command", 1);
+  pub_joint_cmd_[2] = nh.advertise<unitree_legged_msgs::MotorCmd>("/" + robot_name + "_gazebo/FL_calf_controller/command", 1);
 
-  pub_joint_cmd_[3] = nh.advertise<unitree_legged_msgs::MotorCmd>("/go1_gazebo/FR_hip_controller/command", 1);
-  pub_joint_cmd_[4] = nh.advertise<unitree_legged_msgs::MotorCmd>("/go1_gazebo/FR_thigh_controller/command", 1);
-  pub_joint_cmd_[5] = nh.advertise<unitree_legged_msgs::MotorCmd>("/go1_gazebo/FR_calf_controller/command", 1);
+  pub_joint_cmd_[3] = nh.advertise<unitree_legged_msgs::MotorCmd>("/" + robot_name + "_gazebo/FR_hip_controller/command", 1);
+  pub_joint_cmd_[4] = nh.advertise<unitree_legged_msgs::MotorCmd>("/" + robot_name + "_gazebo/FR_thigh_controller/command", 1);
+  pub_joint_cmd_[5] = nh.advertise<unitree_legged_msgs::MotorCmd>("/" + robot_name + "_gazebo/FR_calf_controller/command", 1);
 
-  pub_joint_cmd_[6] = nh.advertise<unitree_legged_msgs::MotorCmd>("/go1_gazebo/RL_hip_controller/command", 1);
-  pub_joint_cmd_[7] = nh.advertise<unitree_legged_msgs::MotorCmd>("/go1_gazebo/RL_thigh_controller/command", 1);
-  pub_joint_cmd_[8] = nh.advertise<unitree_legged_msgs::MotorCmd>("/go1_gazebo/RL_calf_controller/command", 1);
+  pub_joint_cmd_[6] = nh.advertise<unitree_legged_msgs::MotorCmd>("/" + robot_name + "_gazebo/RL_hip_controller/command", 1);
+  pub_joint_cmd_[7] = nh.advertise<unitree_legged_msgs::MotorCmd>("/" + robot_name + "_gazebo/RL_thigh_controller/command", 1);
+  pub_joint_cmd_[8] = nh.advertise<unitree_legged_msgs::MotorCmd>("/" + robot_name + "_gazebo/RL_calf_controller/command", 1);
 
-  pub_joint_cmd_[9] = nh.advertise<unitree_legged_msgs::MotorCmd>("/go1_gazebo/RR_hip_controller/command", 1);
-  pub_joint_cmd_[10] = nh.advertise<unitree_legged_msgs::MotorCmd>("/go1_gazebo/RR_thigh_controller/command", 1);
-  pub_joint_cmd_[11] = nh.advertise<unitree_legged_msgs::MotorCmd>("/go1_gazebo/RR_calf_controller/command", 1);
+  pub_joint_cmd_[9] = nh.advertise<unitree_legged_msgs::MotorCmd>("/" + robot_name + "_gazebo/RR_hip_controller/command", 1);
+  pub_joint_cmd_[10] = nh.advertise<unitree_legged_msgs::MotorCmd>("/" + robot_name + "_gazebo/RR_thigh_controller/command", 1);
+  pub_joint_cmd_[11] = nh.advertise<unitree_legged_msgs::MotorCmd>("/" + robot_name + "_gazebo/RR_calf_controller/command", 1);
 
   actionDouble_.setZero(12);  prevActionDouble_.setZero(12);  action_.setZero(12);
   targetPoses_.setZero(12);  clipPoseLower_.setZero(12);  clipPoseUpper_.setZero(12);

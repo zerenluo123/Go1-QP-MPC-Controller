@@ -37,6 +37,8 @@
 class Go1Observation{
  public:
   Go1Observation(ros::NodeHandle &nh) {
+    ros::param::get("robot_name", robot_name);
+
     obDim_ = 36;
     obDouble_.setZero(obDim_); obScaled_.setZero(obDim_);
 
@@ -66,21 +68,21 @@ class Go1Observation{
     sub_gt_pose_msg_ = nh.subscribe("/torso_odom", 100, &Go1Observation::gt_pose_callback, this);
     sub_imu_msg_ = nh.subscribe("/trunk_imu", 100, &Go1Observation::imu_callback, this);
 
-    sub_joint_msg_[0] = nh.subscribe("/go1_gazebo/FL_hip_controller/state", 2, &Go1Observation::FL_hip_state_callback, this);
-    sub_joint_msg_[1] = nh.subscribe("/go1_gazebo/FL_thigh_controller/state", 2, &Go1Observation::FL_thigh_state_callback, this);
-    sub_joint_msg_[2] = nh.subscribe("/go1_gazebo/FL_calf_controller/state", 2, &Go1Observation::FL_calf_state_callback, this);
+    sub_joint_msg_[0] = nh.subscribe("/" + robot_name + "_gazebo/FL_hip_controller/state", 2, &Go1Observation::FL_hip_state_callback, this);
+    sub_joint_msg_[1] = nh.subscribe("/" + robot_name + "_gazebo/FL_thigh_controller/state", 2, &Go1Observation::FL_thigh_state_callback, this);
+    sub_joint_msg_[2] = nh.subscribe("/" + robot_name + "_gazebo/FL_calf_controller/state", 2, &Go1Observation::FL_calf_state_callback, this);
 
-    sub_joint_msg_[3] = nh.subscribe("/go1_gazebo/FR_hip_controller/state", 2, &Go1Observation::FR_hip_state_callback, this);
-    sub_joint_msg_[4] = nh.subscribe("/go1_gazebo/FR_thigh_controller/state", 2, &Go1Observation::FR_thigh_state_callback, this);
-    sub_joint_msg_[5] = nh.subscribe("/go1_gazebo/FR_calf_controller/state", 2, &Go1Observation::FR_calf_state_callback, this);
+    sub_joint_msg_[3] = nh.subscribe("/" + robot_name + "_gazebo/FR_hip_controller/state", 2, &Go1Observation::FR_hip_state_callback, this);
+    sub_joint_msg_[4] = nh.subscribe("/" + robot_name + "_gazebo/FR_thigh_controller/state", 2, &Go1Observation::FR_thigh_state_callback, this);
+    sub_joint_msg_[5] = nh.subscribe("/" + robot_name + "_gazebo/FR_calf_controller/state", 2, &Go1Observation::FR_calf_state_callback, this);
 
-    sub_joint_msg_[6] = nh.subscribe("/go1_gazebo/RL_hip_controller/state", 2, &Go1Observation::RL_hip_state_callback, this);
-    sub_joint_msg_[7] = nh.subscribe("/go1_gazebo/RL_thigh_controller/state", 2, &Go1Observation::RL_thigh_state_callback, this);
-    sub_joint_msg_[8] = nh.subscribe("/go1_gazebo/RL_calf_controller/state", 2, &Go1Observation::RL_calf_state_callback, this);
+    sub_joint_msg_[6] = nh.subscribe("/" + robot_name + "_gazebo/RL_hip_controller/state", 2, &Go1Observation::RL_hip_state_callback, this);
+    sub_joint_msg_[7] = nh.subscribe("/" + robot_name + "_gazebo/RL_thigh_controller/state", 2, &Go1Observation::RL_thigh_state_callback, this);
+    sub_joint_msg_[8] = nh.subscribe("/" + robot_name + "_gazebo/RL_calf_controller/state", 2, &Go1Observation::RL_calf_state_callback, this);
 
-    sub_joint_msg_[9] = nh.subscribe("/go1_gazebo/RR_hip_controller/state", 2, &Go1Observation::RR_hip_state_callback, this);
-    sub_joint_msg_[10] = nh.subscribe("/go1_gazebo/RR_thigh_controller/state", 2, &Go1Observation::RR_thigh_state_callback, this);
-    sub_joint_msg_[11] = nh.subscribe("/go1_gazebo/RR_calf_controller/state", 2, &Go1Observation::RR_calf_state_callback, this);
+    sub_joint_msg_[9] = nh.subscribe("/" + robot_name + "_gazebo/RR_hip_controller/state", 2, &Go1Observation::RR_hip_state_callback, this);
+    sub_joint_msg_[10] = nh.subscribe("/" + robot_name + "_gazebo/RR_thigh_controller/state", 2, &Go1Observation::RR_thigh_state_callback, this);
+    sub_joint_msg_[11] = nh.subscribe("/" + robot_name + "_gazebo/RR_calf_controller/state", 2, &Go1Observation::RR_calf_state_callback, this);
 
     sub_foot_contact_msg_[0] = nh.subscribe("/visual/FL_foot_contact/the_force", 2, &Go1Observation::FL_foot_contact_callback, this);
     sub_foot_contact_msg_[1] = nh.subscribe("/visual/FR_foot_contact/the_force", 2, &Go1Observation::FR_foot_contact_callback, this);
@@ -494,6 +496,7 @@ class Go1Observation{
   Eigen::VectorXd historyTempMem_, jointPosErrorHist_, jointVelHist_;
   int num_history_stack_;
 
-
+  // ! for using different robots
+  std::string robot_name;
 
 };

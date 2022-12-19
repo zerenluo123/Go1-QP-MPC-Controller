@@ -5,19 +5,21 @@
 #include "GazeboServo.hpp"
 
 GazeboServo::GazeboServo(ros::NodeHandle &nh) {
+  ros::param::get("robot_name", robot_name);
+
   // ROS publisher
-  servo_pub[0] = nh.advertise<unitree_legged_msgs::MotorCmd>("/go1_gazebo/FR_hip_controller/command", 1);
-  servo_pub[1] = nh.advertise<unitree_legged_msgs::MotorCmd>("/go1_gazebo/FR_thigh_controller/command", 1);
-  servo_pub[2] = nh.advertise<unitree_legged_msgs::MotorCmd>("/go1_gazebo/FR_calf_controller/command", 1);
-  servo_pub[3] = nh.advertise<unitree_legged_msgs::MotorCmd>("/go1_gazebo/FL_hip_controller/command", 1);
-  servo_pub[4] = nh.advertise<unitree_legged_msgs::MotorCmd>("/go1_gazebo/FL_thigh_controller/command", 1);
-  servo_pub[5] = nh.advertise<unitree_legged_msgs::MotorCmd>("/go1_gazebo/FL_calf_controller/command", 1);
-  servo_pub[6] = nh.advertise<unitree_legged_msgs::MotorCmd>("/go1_gazebo/RR_hip_controller/command", 1);
-  servo_pub[7] = nh.advertise<unitree_legged_msgs::MotorCmd>("/go1_gazebo/RR_thigh_controller/command", 1);
-  servo_pub[8] = nh.advertise<unitree_legged_msgs::MotorCmd>("/go1_gazebo/RR_calf_controller/command", 1);
-  servo_pub[9] = nh.advertise<unitree_legged_msgs::MotorCmd>("/go1_gazebo/RL_hip_controller/command", 1);
-  servo_pub[10] = nh.advertise<unitree_legged_msgs::MotorCmd>("/go1_gazebo/RL_thigh_controller/command", 1);
-  servo_pub[11] = nh.advertise<unitree_legged_msgs::MotorCmd>("/go1_gazebo/RL_calf_controller/command", 1);
+  servo_pub[0] = nh.advertise<unitree_legged_msgs::MotorCmd>("/" + robot_name + "_gazebo/FR_hip_controller/command", 1);
+  servo_pub[1] = nh.advertise<unitree_legged_msgs::MotorCmd>("/" + robot_name + "_gazebo/FR_thigh_controller/command", 1);
+  servo_pub[2] = nh.advertise<unitree_legged_msgs::MotorCmd>("/" + robot_name + "_gazebo/FR_calf_controller/command", 1);
+  servo_pub[3] = nh.advertise<unitree_legged_msgs::MotorCmd>("/" + robot_name + "_gazebo/FL_hip_controller/command", 1);
+  servo_pub[4] = nh.advertise<unitree_legged_msgs::MotorCmd>("/" + robot_name + "_gazebo/FL_thigh_controller/command", 1);
+  servo_pub[5] = nh.advertise<unitree_legged_msgs::MotorCmd>("/" + robot_name + "_gazebo/FL_calf_controller/command", 1);
+  servo_pub[6] = nh.advertise<unitree_legged_msgs::MotorCmd>("/" + robot_name + "_gazebo/RR_hip_controller/command", 1);
+  servo_pub[7] = nh.advertise<unitree_legged_msgs::MotorCmd>("/" + robot_name + "_gazebo/RR_thigh_controller/command", 1);
+  servo_pub[8] = nh.advertise<unitree_legged_msgs::MotorCmd>("/" + robot_name + "_gazebo/RR_calf_controller/command", 1);
+  servo_pub[9] = nh.advertise<unitree_legged_msgs::MotorCmd>("/" + robot_name + "_gazebo/RL_hip_controller/command", 1);
+  servo_pub[10] = nh.advertise<unitree_legged_msgs::MotorCmd>("/" + robot_name + "_gazebo/RL_thigh_controller/command", 1);
+  servo_pub[11] = nh.advertise<unitree_legged_msgs::MotorCmd>("/" + robot_name + "_gazebo/RL_calf_controller/command", 1);
 
   // ROS subscriber
   imu_sub = nh.subscribe("/trunk_imu", 1, &GazeboServo::imuCallback, this);
@@ -25,21 +27,21 @@ GazeboServo::GazeboServo(ros::NodeHandle &nh) {
   footForce_sub[1] = nh.subscribe("/visual/FL_foot_contact/the_force", 1, &GazeboServo::FLfootCallback, this);
   footForce_sub[2] = nh.subscribe("/visual/RR_foot_contact/the_force", 1, &GazeboServo::RRfootCallback, this);
   footForce_sub[3] = nh.subscribe("/visual/RL_foot_contact/the_force", 1, &GazeboServo::RLfootCallback, this);
-  servo_sub[0] = nh.subscribe("/go1_gazebo/FR_hip_controller/state", 1, &GazeboServo::FRhipCallback, this);
-  servo_sub[1] = nh.subscribe("/go1_gazebo/FR_thigh_controller/state", 1, &GazeboServo::FRthighCallback, this);
-  servo_sub[2] = nh.subscribe("/go1_gazebo/FR_calf_controller/state", 1, &GazeboServo::FRcalfCallback, this);
-  servo_sub[3] = nh.subscribe("/go1_gazebo/FL_hip_controller/state", 1, &GazeboServo::FLhipCallback, this);
-  servo_sub[4] = nh.subscribe("/go1_gazebo/FL_thigh_controller/state", 1, &GazeboServo::FLthighCallback, this);
-  servo_sub[5] = nh.subscribe("/go1_gazebo/FL_calf_controller/state", 1, &GazeboServo::FLcalfCallback, this);
-  servo_sub[6] = nh.subscribe("/go1_gazebo/RR_hip_controller/state", 1, &GazeboServo::RRhipCallback, this);
-  servo_sub[7] = nh.subscribe("/go1_gazebo/RR_thigh_controller/state", 1, &GazeboServo::RRthighCallback, this);
-  servo_sub[8] = nh.subscribe("/go1_gazebo/RR_calf_controller/state", 1, &GazeboServo::RRcalfCallback, this);
-  servo_sub[9] = nh.subscribe("/go1_gazebo/RL_hip_controller/state", 1, &GazeboServo::RLhipCallback, this);
-  servo_sub[10] = nh.subscribe("/go1_gazebo/RL_thigh_controller/state", 1, &GazeboServo::RLthighCallback, this);
-  servo_sub[11] = nh.subscribe("/go1_gazebo/RL_calf_controller/state", 1, &GazeboServo::RLcalfCallback, this);
+  servo_sub[0] = nh.subscribe("/" + robot_name + "_gazebo/FR_hip_controller/state", 1, &GazeboServo::FRhipCallback, this);
+  servo_sub[1] = nh.subscribe("/" + robot_name + "_gazebo/FR_thigh_controller/state", 1, &GazeboServo::FRthighCallback, this);
+  servo_sub[2] = nh.subscribe("/" + robot_name + "_gazebo/FR_calf_controller/state", 1, &GazeboServo::FRcalfCallback, this);
+  servo_sub[3] = nh.subscribe("/" + robot_name + "_gazebo/FL_hip_controller/state", 1, &GazeboServo::FLhipCallback, this);
+  servo_sub[4] = nh.subscribe("/" + robot_name + "_gazebo/FL_thigh_controller/state", 1, &GazeboServo::FLthighCallback, this);
+  servo_sub[5] = nh.subscribe("/" + robot_name + "_gazebo/FL_calf_controller/state", 1, &GazeboServo::FLcalfCallback, this);
+  servo_sub[6] = nh.subscribe("/" + robot_name + "_gazebo/RR_hip_controller/state", 1, &GazeboServo::RRhipCallback, this);
+  servo_sub[7] = nh.subscribe("/" + robot_name + "_gazebo/RR_thigh_controller/state", 1, &GazeboServo::RRthighCallback, this);
+  servo_sub[8] = nh.subscribe("/" + robot_name + "_gazebo/RR_calf_controller/state", 1, &GazeboServo::RRcalfCallback, this);
+  servo_sub[9] = nh.subscribe("/" + robot_name + "_gazebo/RL_hip_controller/state", 1, &GazeboServo::RLhipCallback, this);
+  servo_sub[10] = nh.subscribe("/" + robot_name + "_gazebo/RL_thigh_controller/state", 1, &GazeboServo::RLthighCallback, this);
+  servo_sub[11] = nh.subscribe("/" + robot_name + "_gazebo/RL_calf_controller/state", 1, &GazeboServo::RLcalfCallback, this);
 
   // low state publisher
-  lowState_pub = nh.advertise<unitree_legged_msgs::LowState>("/go1_gazebo/lowState/state", 1);
+  lowState_pub = nh.advertise<unitree_legged_msgs::LowState>("/" + robot_name + "_gazebo/lowState/state", 1);
 
   motion_time = 0.;
 

@@ -60,4 +60,6 @@ class GazeboServo
   double duration = 1000;
   double target_pos[12];
 
+  std::string robot_name;
+
 };

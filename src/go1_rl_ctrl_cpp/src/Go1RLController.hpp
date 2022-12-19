@@ -91,6 +91,7 @@ class Go1RLController {
   double alpha_ = 0.1;
   Eigen::VectorXd pGains_;
   Eigen::VectorXd dGains_;
+  std::string robot_name;
 
   // ! go1 control state
   Go1CtrlStates go1_ctrl_states_;
