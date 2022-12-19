@@ -72,6 +72,8 @@ Go1RLHardwareController::Go1RLHardwareController(ros::NodeHandle &nh)
     rho_fix_list.push_back(rho_fix);
     rho_opt_list.push_back(rho_opt);
   }
+  footForceOffset_.setZero(4);
+  footForceOffset_ << 3.0, 22.0, 92.0, 72.0;
 
   //init swap order, very important
   swap_joint_indices << 3, 4, 5, 0, 1, 2, 9, 10, 11, 6, 7, 8;
@@ -394,7 +396,7 @@ void Go1RLHardwareController::receive_low_state() {
       foot_force_filters_idx[i]++;
       foot_force_filters_idx[i] %= FOOT_FILTER_WINDOW_SIZE;
 
-      go1_ctrl_states.foot_force[i] = foot_force_filters_sum[i] / static_cast<double>(FOOT_FILTER_WINDOW_SIZE);
+      go1_ctrl_states.foot_force[i] = foot_force_filters_sum[i] / static_cast<double>(FOOT_FILTER_WINDOW_SIZE) - footForceOffset_[i];
     }
 
     // publish joint angle and foot force

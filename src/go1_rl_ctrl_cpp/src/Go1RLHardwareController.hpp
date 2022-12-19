@@ -193,6 +193,9 @@ class Go1RLHardwareController {
   // ! servo motion time
   double servo_motion_time_;
 
+  // ! foot force offset
+  Eigen::VectorXd footForceOffset_;
+
 };
 
 #endif //GO1_CPP_HARDWAREGO1ROS_H
