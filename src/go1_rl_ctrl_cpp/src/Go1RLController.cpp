@@ -39,14 +39,14 @@ Go1RLController::Go1RLController(ros::NodeHandle &nh) {
 
   // ! set kp kd gains
   pGains_.setZero(12);  dGains_.setZero(12);
-  pGains_ << 20., 50., 50.,
-             20., 50., 50.,
-             20., 50., 50.,
-             20., 50., 50.;
-  dGains_ << 1., 2., 2.,
-             1., 2., 2.,
-             1., 2., 2.,
-             1., 2., 2.;
+  pGains_ << 30., 50., 50.,
+          30., 50., 50.,
+          30., 50., 50.,
+          30., 50., 50.;
+  dGains_ << 2., 2., 2.,
+             2., 2., 2.,
+             2., 2., 2.,
+             2., 2., 2.;
 
   servo_motion_time_ = 0.;
 
@@ -77,14 +77,14 @@ void Go1RLController::loadNNparams() {
 }
 
 bool Go1RLController::advance(double dt) {
-  pGains_ << 20., 50., 50.,
-      20., 50., 50.,
-      20., 50., 50.,
-      20., 50., 50.;
-  dGains_ << 1., 2., 2.,
-      1., 2., 2.,
-      1., 2., 2.,
-      1., 2., 2.;
+  pGains_ << 30., 50., 50.,
+          30., 50., 50.,
+          30., 50., 50.,
+          30., 50., 50.;
+  dGains_ << 2., 2., 2.,
+      2., 2., 2.,
+      2., 2., 2.,
+      2., 2., 2.;
 
   // walk
   // updata obs except for actions
